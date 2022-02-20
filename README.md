@@ -12,3 +12,11 @@ Emolib is a Python library that checks against the input text, after having enri
 
 It has already been used for our analysis of the [semantic and emotional frames around COVID-19 vaccines](https://github.com/alfonsosemeraro/vaccines-and-press).
 Check out our analysis of the emotional content of the [Festival di Sanremo 2022](https://arcs.di.unito.it/2022/02/04/i-fiori-di-sanremo/) songs! 
+
+
+Authors: 
+
+**ALFONSO SEMERARO**: University of Turin, ARC²S Group [🎓 ](https://scholar.google.it/citations?user=wrUG4-cAAAAJ) [🐦](https://twitter.com/AlfonsoSemeraro)
+**SALVATORE VILELLA**: University of Turin, ARC²S Group [🎓 ](https://scholar.google.it/citations?user=zQFTgBEAAAAJ) [🐦](https://twitter.com/sal_vilella)
+**GIANCARLO RUFFO**: University of Turin, ARC²S Group [🎓 ](https://scholar.google.it/citations?user=tTIeDa4AAAAJ) [🐦](https://twitter.com/giaruffo)
+**MASSIMO STELLA**: University of Exeter, CogNosco Lab [🎓 ](https://scholar.google.it/citations?user=TUJkCbkAAAAJ) [🐦](https://twitter.com/MassimoSt)
