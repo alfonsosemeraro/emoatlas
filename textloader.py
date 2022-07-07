@@ -134,10 +134,10 @@ def _load_text(text, spacy_model, language = 'english', duplicates = False, nega
     
     ## REPLACED WITH TREETAGWRAPPER!
     
-#     # Load the correct spacy model
-#     nlp = _load_spacy(spacy_model, language)    
-#     # get tokens
-#     tokens = [token.lemma_ for token in nlp(text)]
+    # Load the correct spacy model
+    nlp = _load_spacy(spacy_model, language)    
+    # get tokens
+    tokens = [token.lemma_ for token in nlp(text)]
     
     
         
