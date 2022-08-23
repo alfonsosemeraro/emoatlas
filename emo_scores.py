@@ -1,440 +1,124 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Thu Aug 26 12:02:51 2021
+@author: alfonso.semeraro@unito.it
 
-@author: alfonso
 """
 
 import numpy as np
-from language_dependencies import _negations
-from resources import _load_valences, _emotion_model_resources
-import distributions as _dstr
 import itertools
 import textloader as _txl 
-from collections import namedtuple
-from baselines import _make_baseline
+from random import choices
+   
 
 
-def _valence(obj,
-            emotion_lexicon = None, 
-           normalization_strategy = 'none', 
-           emotions = None, 
-           language = 'english',
-           spacy_model = None,
-           duplicates = True,
-           negation_strategy = 'ignore',
-           negations = None,
-           antonyms = None,
-           method = 'default',
-           target_word = None,
-           emotion_model = 'plutchik',
-           wn = None):
-        
+def _get_emotions(obj, 
+                   emotion_lexicon, 
+                   language,
+                   normalization_strategy, 
+                   tagger,
+                   emotions,
+                   return_words,
+                   emojis_dict,
+                   convert_emojis):
     
-
-    if not emotions and emotion_model == 'plutchik':
-        emotions = ['anger', 'trust', 'surprise', 'disgust', 'joy', 'sadness', 'fear', 'anticipation']
         
     wordlist = _txl._load_object(obj = obj,
                            language = language,
-                           spacy_model = spacy_model,
-                           negation_strategy = negation_strategy,
-                           negations = negations,
-                           antonyms = antonyms,
-                           method = method,
-                           target_word = target_word,
-                           duplicates = duplicates,
-                           keepwords = [],
-                           stopwords = ['it'],
-                           wn = wn)
+                           tagger = tagger,
+                           emojis_dict = emojis_dict, 
+                           convert_emojis = convert_emojis)
         
+    # word-emotion pairs
+    emowords = [[(w, emo) for emo in emotion_lexicon[w]] for w in wordlist if w in emotion_lexicon]
+    emowords = list(itertools.chain(*emowords))
     
-    _positive, _negative, _ = _load_valences(language)
+    # emotion: count, list of words
+    emowords = {emo: list(set([word for word, emotion in emowords if emo == emotion])) for emo in emotions}
+    emowords = {emo: {'count': len(emo_words), 'words': emo_words} for emo, emo_words in emowords.items()}
     
-    pos_score = len([w for w in wordlist if w in _positive])
-    neg_score = len([w for w in wordlist if w in _negative])
+    if return_words:
+        return emowords
     
-    
-    
-    try:
-        score = pos_score / (pos_score + neg_score)
-        score = (score*2) - 1
-    except Exception as e:
-        print(e)
-        score = 0
+    else:
+        emowords = {emo: emowords[emo]['count'] for emo in emowords}
         
-    return score
-
-def _count_emotions(obj, 
-                   emotion_lexicon = None, 
-                   normalization_strategy = 'none', 
-                   emotions = None, 
-                   language = 'english',
-                   spacy_model = 'en_core_web_sm',
-                   duplicates = True,
-                   negation_strategy = 'ignore',
-                   negations = None,
-                   antonyms = None,
-                   method = 'default',
-                   target_word = None,
-                   emotion_model = 'plutchik',
-                   wn = None):
-    
-    """
-    Count emotions in given wordlist.
-
-    Required arguments:
-    ----------
-    *text*:
-        The input text. 
-        
-    *emotion_lexicon*:
-        A lexicon with every word-emotion association. By default, the NRCLexicon will be loaded.
-        
-    *normalize_strategy*:
-        A string, whether to normalize emotion scores over the number of words. Accepted values are:
-            'none': no normalization at all
-            'text_lenght': normalize emotion counts over the total text length
-            'emotion_words': normalize emotion counts over the number of words associated to an emotion
+        if normalization_strategy == 'text_length':
+            N = len(wordlist)
+            emowords = {key: val/N if N else 0 for key, val in emowords.items()}
             
-    *emotions*:
-        A list of emotions, depending on the model required. Default is Pluthick's wheel of emotions model.
-        
-    *language*:
-        Language of the text. Full support is offered for the languages supported by Spacy: 
-            Catalan, Chinese, Danish, Dutch, English, French, German, Greek, Japanese, Italian, Lithuanian,
-            Macedonian, Norvegian, Polish, Portuguese, Romanian, Russian, Spanish.
-        Limited support for other languages is available.
-        
-    Returns:
-    ----------
-    *emo_counts*:
-        A dict. For each emotion the associated counts.  
-        
-    *n_emotionwords*:
-        An integer, the number of words associated with an emotion in wordlist.
-    """        
+        elif normalization_strategy == 'emotion_words':
+            N = sum(emowords.values())
+            emowords = {key: val/N if N else 0 for key, val in emowords.items()}
     
-
-    
-    if not emotions and emotion_model == 'plutchik':
-        emotions = ['anger', 'trust', 'surprise', 'disgust', 'joy', 'sadness', 'fear', 'anticipation']
-        
-    wordlist = _txl._load_object(obj = obj,
-                           language = language,
-                           spacy_model = spacy_model,
-                           negation_strategy = negation_strategy,
-                           negations = negations,
-                           antonyms = antonyms,
-                           method = method,
-                           target_word = target_word,
-                           duplicates = duplicates,
-                           keepwords = [],
-                           stopwords = ['it'],
-                           wn = wn)
-        
-        
-    emo_distr = _dstr._emotion_distribution(wordlist = wordlist, emotion_lexicon = emotion_lexicon, emotions = emotions, language = language)   
-    n_emotionwords = len(emo_distr)
-    
-    
-    emo = list(itertools.chain(*emo_distr))
-    emo_counts = {emotion: emo.count(emotion) for emotion in emotions}
-    
-    if normalization_strategy not in ['none', 'num_words', 'num_emotions']:
-        raise ValueError("'normalization_strategy' must be one of 'none', 'num_words', 'num_emotions'.")
-        
-    if normalization_strategy == 'num_words':
-        emo_counts = {key: val / len(wordlist) for key, val in emo_counts.items()}
-    elif normalization_strategy == 'num_emotions':
-        try:
-            emo_counts = {key: val / n_emotionwords for key, val in emo_counts.items()}
-        except ZeroDivisionError:
-            emo_counts = {key: 0 for key, _ in emo_counts.items()}
-    
-    ecounts = namedtuple('emotion_counts', 'emotions num_emotion_words')
-    return ecounts(emo_counts, n_emotionwords)
-    
-
-
-def _emotion_words(obj, 
-                   emotion_lexicon = None, 
-                   normalization_strategy = 'none', 
-                   emotions = None, 
-                   language = 'english',
-                   spacy_model = 'en_core_web_sm',
-                   duplicates = True,
-                   negation_strategy = 'ignore',
-                   negations = None,
-                   antonyms = None,
-                   method = 'default',
-                   target_word = None,
-                   emotion_model = 'plutchik',
-                   wn = None):
-    
-    """
-    Count the words most associated to emotions in given object.
-
-    Required arguments:
-    ----------
-    *text*:
-        The input text. 
-        
-    *emotion_lexicon*:
-        A lexicon with every word-emotion association. By default, the NRCLexicon will be loaded.
-        
-    *normalize_strategy*:
-        A string, whether to normalize emotion scores over the number of words. Accepted values are:
-            'none': no normalization at all
-            'text_lenght': normalize emotion counts over the total text length
-            'emotion_words': normalize emotion counts over the number of words associated to an emotion
-            
-    *emotions*:
-        A list of emotions, depending on the model required. Default is Pluthick's wheel of emotions model.
-        
-    *language*:
-        Language of the text. Full support is offered for the languages supported by Spacy: 
-            Catalan, Chinese, Danish, Dutch, English, French, German, Greek, Japanese, Italian, Lithuanian,
-            Macedonian, Norvegian, Polish, Portuguese, Romanian, Russian, Spanish.
-        Limited support for other languages is available.
-        
-    Returns:
-    ----------
-    *emo_counts*:
-        A dict. For each emotion the associated counts.  
-        
-    *n_emotionwords*:
-        An integer, the number of words associated with an emotion in wordlist.
-    """        
-    
-
-    
-    if not emotions and emotion_model == 'plutchik':
-        emotions = ['anger', 'trust', 'surprise', 'disgust', 'joy', 'sadness', 'fear', 'anticipation']
-        
-    wordlist = _txl._load_object(obj = obj,
-                           language = language,
-                           spacy_model = spacy_model,
-                           negation_strategy = negation_strategy,
-                           negations = negations,
-                           antonyms = antonyms,
-                           method = method,
-                           target_word = target_word,
-                           duplicates = duplicates,
-                           keepwords = [],
-                           stopwords = ['it'],
-                           wn = wn)
-        
-        
-    emo_distr = _dstr._emotion_words(wordlist = wordlist, emotion_lexicon = emotion_lexicon, emotions = emotions, language = language)   
-
-    for emo, val in emo_distr.items():
-        emo_distr[emo] = {k: c for k, c in zip(val['word'], val['count'])}
-    
-    
-    return emo_distr
-
-
-def _stats(obj, 
-          emotion_lexicon = None,
-          emotions = None, 
-          language = 'english',
-          spacy_model = 'en_core_web_sm',
-          duplicates = True,
-          negation_strategy = 'ignore',
-          negations = None,
-          antonyms = None,
-          method = 'default',
-          target_word = None,
-          emotion_model = 'plutchik',
-          wn = None):
-    
-    
-    wordlist = _txl._load_object(obj = obj,
-                           language = language,
-                           spacy_model = spacy_model,
-                           negation_strategy = negation_strategy,
-                           negations = negations,
-                           antonyms = antonyms,
-                           method = method,
-                           target_word = target_word,
-                           duplicates = duplicates,
-                           keepwords = [],
-                           stopwords = ['it'],
-                           wn = wn)
-        
-        
-    emo_distr = _dstr._emotion_distribution(wordlist = wordlist, emotion_lexicon = emotion_lexicon, emotions = emotions, language = language)   
-    n_emotionwords = len(emo_distr)
-    
-    emo_distr_unique = _dstr._emotion_distribution(wordlist = list(set(wordlist)), emotion_lexicon = emotion_lexicon, emotions = emotions, language = language)
-    n_emotionwords_unique = len(emo_distr_unique)
-    
-    
-    emo = list(itertools.chain(*emo_distr))
-    emo_counts = {emotion: emo.count(emotion) for emotion in emotions}
-    
-    
-    emo_unique = list(itertools.chain(*emo_distr_unique))
-    emo_counts_unique = {emotion: emo_unique.count(emotion) for emotion in emotions}
-    
- 
-    out = {}
-    out['emotions'] = {'num_emotionwords': n_emotionwords,
-                       'num_emotionwords_unique': n_emotionwords_unique,
-                       'perc_emotionwords': n_emotionwords / len(wordlist),
-                       'perc_emotionwords_unique': n_emotionwords_unique / len(set(wordlist))}
-    
-    for emotion in emotions:
-        out[emotion] = {'num_words': emo_counts[emotion],
-                        'num_words_unique': emo_counts_unique[emotion],
-                        'perc_text': emo_counts[emotion] / len(wordlist),
-                        'perc_text_unique': emo_counts_unique[emotion] / len(set(wordlist))}
-    
-    for emotion in emotions:
-        try:
-            out[emotion]['perc_emotionwords'] = out[emotion]['num_words'] / n_emotionwords
-            out[emotion]['perc_emotionwords_unique'] = out[emotion]['num_words_unique'] / n_emotionwords_unique
-        except:
-            out[emotion]['perc_emotionwords'] = 0
-            out[emotion]['perc_emotionwords_unique'] = 0
-            
-    negations = _negations[language] if not negations else negations
-    out['negations'] = {'num_negations': len([word for word in wordlist if word in negations]),
-                        'num_negations_unique': len([word for word in set(wordlist) if word in negations])}
-    
-    out['words'] = {'num_words': len(wordlist), 'num_words_unique': len(set(wordlist))}
-    
-    return out
-    
+    return emowords
 
 
 
 
 
-def _zscores(obj, 
-           language = 'english', 
-           spacy_model = 'en_core_web_sm',
-           baseline = None, 
-           emotion_lexicon = None, 
-           duplicates = False, 
-           negation_strategy = 'ignore', 
-           antonyms = None, 
-           negations = None, 
-           n_samples = 300, 
-           method = 'default',
-           target_word = None,
-           emotion_model = 'plutchik',
-           wn = None, 
-           epsilon = 0.0):
-    
-    """
-    Get z-scores for each emotion detected in the any word of the wordlist.
-    It compares emotions detected against mean and standard deviation of the same emotion
-    in 300 random samples.
 
-    Required arguments:
-    ----------
-    *text*:
-        The input text. 
+def _zscores(obj,
+             baseline,
+             n_samples,
+             emotion_lexicon,
+             language,
+             tagger,
+             emotions,
+             lookup,
+             emojis_dict,
+             convert_emojis):
+    
+    emotion_words = _get_emotions(obj = obj, emotion_lexicon = emotion_lexicon, language = language, 
+                                   normalization_strategy = 'none', tagger = tagger, emotions = emotions,
+                                   return_words = True, emojis_dict = emojis_dict, convert_emojis = convert_emojis)
+    
+    # # text_emo: 'joy': 'L'
+    # S = sum([emotion_words[emo]['count'] for emo in emotions])
+    # text_emo = {emo: emotion_words[emo]['count']/S if S != 0 else 0 for emo in emotions}
+    
+    
+    # N words to sample
+    N = len(set(itertools.chain(*[emotion_words[emo]['words'] for emo in emotions])))
+    
+    
+    # No 1 word sentences
+    if N == 1:
+        return {emo: 2 if emotion_words[emo]['count'] > 0 else 0 for emo in emotion_words}
+    
+    # Few emotion words? only count emotions that appear twice
+    elif N <= 5:
+        return {emo: 2 if emotion_words[emo]['count'] > 1 else 0 for emo in emotion_words}
+    
+    
+    # N is in the lookup table
+    if N in lookup:
+        zscores = {emo: (emotion_words[emo].get('count', 0) - lookup[N][emo]['mean']) / lookup[N][emo]['std'] if lookup[N][emo]['std'] else 0 for emo in emotions}
+        return zscores
+    
+    
+    # otherwise I'll compute it and add it to lookup
+    
+    # all samples together
+    all_samples = {emo: [] for emo in emotions}
+    
+    for _ in range(n_samples):
         
-    *language*:
-        Language of the text. Full support is offered for the languages supported by Spacy: 
-            Catalan, Chinese, Danish, Dutch, English, French, German, Greek, Japanese, Italian, Lithuanian,
-            Macedonian, Norvegian, Polish, Portuguese, Romanian, Russian, Spanish.
-        Limited support for other languages is available.
-    
-    *spacy_model*:
-        Either a string or a spacy object. If string, it must be the name of a spacy model installed on your system.
+        # random choice N with prob
+        sample = choices(baseline[0], weights = baseline[1], k = N)
+        sample = list(itertools.chain(*sample))
         
-    *baseline*:
-        A list of words. Wordlist's emotion distribution will be checked against the baseline's emotion distribution.
-        Default is None: wordlist will be checked against a random sample from the emotion_lexicon.
+        # count emotions
+        sample = {emo: sample.count(emo) for emo in emotions}
+                
+        # add to all_samples
+        all_samples = {emo: all_samples[emo] + [sample.get(emo, 0)] for emo in emotions}
         
-    *emotion_lexicon*:
-        A lexicon with every word-emotion association. By default, the NRCLexicon will be loaded.
-        
-    *negation_strategy*:
-        A string, if words introduced by negations will be replaced by their antynomies.
-        Default is ignore', for which no action will be done.
-        Other values accepted are 'replace', i.e. words introduced by negations will be replaced,
-        and 'delete', i.e. those words will be deleted.
-    
-    *antonyms*:
-        A dict. For each word in the dict's keys, the correspondent value is its antynomy.
-        Default is None: a pre-compiled dictionary will be loaded.
-        
-    *negations*:
-        A custom-defined list of negations. 
-        Default is None: a pre-compiled list will be loaded.
-    
-    *duplicates*:
-        A boolean: if True, words associated with emotions will be counted as many times as they appear into the wordlist.
-        If False, each word will be counted only once. Default is False.
-        
-    *n_samples*:
-        An integer: how many times the wordlist will be checked against a random sample taken from a custom baseline.
-        
-    *emotion_model*:
-        A string, what emotion model to use. Default is 'plutchik', i.e. the Plutchik's wheel of emotions.
-    
-    Returns:
-    ----------
-    
-    *zscores*:
-        A dict. For each emotion the associated z-score.    
-    """
-    
-    
-    # 1. load 
-    # 2. get resources for emotion model == plutchik?
-    # 3. check data duplicates
-    # 4. handle negations
-    # 5. get emotion counts
-    # 6. manage the baseline
-    # 7. get random samples distribution
-    # 8. return z-scores
-    
-    
-#    # Check for language
-#    check_language(language)
-    
-    # Check emotions resources: lexicon and emtions
-    emotion_lexicon, emotions = _emotion_model_resources(emotion_lexicon = emotion_lexicon, 
-                                                               emotion_model = emotion_model,
-                                                               language = language)
-    
-    
-    # check data format
-    if len(obj) == 0:
-        return {emo: np.nan for emo in emotions}
-    
-    
-    # count emotions in wordlist
-    emo_counts, n_emotionwords = _count_emotions(obj = obj, 
-                                                emotion_lexicon = emotion_lexicon,
-                                                normalization_strategy = 'none',
-                                                language = language,
-                                                spacy_model = spacy_model, 
-                                                duplicates = duplicates,
-                                                negation_strategy = negation_strategy,
-                                                negations = negations,
-                                                antonyms = antonyms,
-                                                emotions = emotions,
-                                                method = method,
-                                                target_word = target_word,
-                                                wn = wn)
-    
-    # sample against baseline
-    baseline = _make_baseline(baseline = baseline, spacy_model = spacy_model, emotion_lexicon = emotion_lexicon, emotions = emotions, language = language)
-    
-    
-    # Get emotions in 300 random samples
-    emo_samples = _dstr._samples(baseline_distr = baseline, sample_size = n_emotionwords, n_samples = n_samples, emotions = emotions, epsilon = epsilon)
+    # All samples: 'joy': 'mean': ... 'std': ...
+    # Add all samples to lookup[N]
+    all_samples = {emo: {'mean': np.mean(all_samples[emo]), 'std': np.std(all_samples[emo])} for emo in emotions}
+    lookup[N] = all_samples
     
     # Get z-scores
-    zscores = {key.lower(): (emo_counts.get(key, 0) - emo_samples[key]['mean']) / emo_samples[key]['std'] for key in emotions}
+    zscores = {emo: (emotion_words[emo].get('count', 0) - all_samples[emo]['mean']) / all_samples[emo]['std'] if all_samples[emo]['std'] else 0 for emo in emotions}
 
     
     return zscores

@@ -23,15 +23,17 @@ from math import cos, sin, radians
 import numpy as np
 import emotions as _emo_pluthick_
 import dyads as _dyads_pluthick_
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 __author__ = """Alfonso Semeraro (alfonso.semeraro@gmail.com)"""
 __all__ = ['_rotate_point',
            '_polar_coordinates',
            '_neutral_central_circle',
            '_check_scores_kind',
-           '_draw_plutchik',
-           '_get_random_emotions',
-           '_get_random_dyads']
+           'draw_plutchik',
+           'get_random_emotions',
+           'get_random_dyads']
 
 
 
@@ -126,7 +128,7 @@ def _polar_coordinates(ax, font, fontweight, fontsize, show_ticklabels, ticklabe
         for x, tv in zip(np.arange(0.2, 1.2, .2), true_values):
             a = '+{}'.format(round(tv, 1)) if tv >= 0 else str(round(tv,1))
             x, y = _rotate_point((0, x + offset), ticklabels_angle) #-.12
-            ax.annotate(s = a, xy = (x, y),  fontfamily = font, size = ticklabels_size, fontweight = fontweight, zorder = 8, rotation = ticklabels_angle)
+            ax.annotate(text = a, xy = (x, y),  fontfamily = font, size = ticklabels_size, fontweight = fontweight, zorder = 8, rotation = ticklabels_angle)
     return ax
 
 
@@ -313,7 +315,7 @@ def _draw_rejection_region(ax, reject_range, rescale, offset = .15):
     
 
 
-def _get_random_emotions(intensity_levels = False):
+def get_random_emotions(intensity_levels = False):
     
     """
     Gets a dict with emotions, ready to be drawed.
@@ -353,7 +355,7 @@ def _get_random_emotions(intensity_levels = False):
     
     
     
-def _get_random_dyads(dyads_kind = 'primary'):
+def get_random_dyads(dyads_kind = 'primary'):
     """
     Gets a dict with dyads, ready to be drawed.
     
@@ -444,18 +446,19 @@ def _check_values(scores, rescale, reject_range):
         # Now we take extremes...
         min_score = tmp if tmp < min_score else min_score
         max_score = tmp if tmp > max_score else max_score
-        
+        abs_max = max([abs(min_score), abs(max_score)])
     
     # ...and now we can compute normalization!
     
     # Case A: users tell a reject_range, but don't decide any normalization scale: we do
     if (not rescale) and (reject_range):
-        max_score = max_score if max_score > reject_range[1] else reject_range[1]
-        min_score = min_score if min_score < reject_range[0] else reject_range[0]
-        emo_diff = max_score - min_score
-        min_score -= emo_diff*.1
-        max_score += emo_diff*.1
-        rescale = (min_score, max_score)
+        # max_score = max_score if max_score > reject_range[1] else reject_range[1]
+        # min_score = min_score if min_score < reject_range[0] else reject_range[0]
+        # emo_diff = max_score - min_score
+        # min_score -= emo_diff*.1
+        # max_score += emo_diff*.1
+        # rescale = (min_score, max_score)
+        rescale = (-2.5*abs_max, 2.5*abs_max)
         
     # Case B: users tell a reject_range, and they decide a normalization scale: we check correctness
     elif rescale and reject_range:
@@ -486,7 +489,7 @@ def _check_values(scores, rescale, reject_range):
 
 
     
-def _draw_plutchik(scores,
+def draw_plutchik(scores,
              ax = None,
              rescale = None,
              reject_range = None, 
@@ -640,7 +643,7 @@ def _draw_plutchik(scores,
         _, _, _, level = _dyads_pluthick_.dyad_params(list(dyads.keys())[0]) # get the first dyad level (they all are the same)
         ll = level if level != 4 else 'opp.' # what to annotate
         xy = (-0.03, -0.03) if level != 4 else (-0.13, -0.03) # exact center of '1' or 'opp' is slightly different
-        ax.annotate(s = ll, xy = xy, fontsize = fontsize, fontfamily = font, fontweight = 'bold', zorder = 30)   
+        ax.annotate(text = ll, xy = xy, fontsize = fontsize, fontfamily = font, fontweight = 'bold', zorder = 30)   
         
         # Ghost dotted track that connects colored arcs
         c = plt.Circle((0, 0), 1.60, color = 'grey', alpha = .3, fill = False, zorder = -20, linestyle = 'dotted' )
@@ -826,7 +829,7 @@ def _draw_plutchik(scores,
 #        _, _, _, level = _dyads_pluthick_.dyad_params(list(dyads.keys())[0]) # get the first dyad level (they all are the same)
 #        ll = level if level != 4 else 'opp.' # what to annotate
 #        xy = (-0.03, -0.03) if level != 4 else (-0.13, -0.03) # exact center of '1' or 'opp' is slightly different
-#        ax.annotate(s = ll, xy = xy, fontsize = fontsize, fontfamily = font, fontweight = 'bold', zorder = 30)   
+#        ax.annotate(text = ll, xy = xy, fontsize = fontsize, fontfamily = font, fontweight = 'bold', zorder = 30)   
 #        
 #        # Ghost dotted track that connects colored arcs
 #        c = plt.Circle((0, 0), 1.60, color = 'grey', alpha = .3, fill = False, zorder = -20, linestyle = 'dotted' )

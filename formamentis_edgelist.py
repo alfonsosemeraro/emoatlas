@@ -9,13 +9,14 @@ Created on Sat Aug 21 18:00:50 2021
 import networkx as nx
 import itertools
 from textloader import _clean_text
-from language_dependencies import _negations, _pronouns, _language_code3
-from resources import  _load_spacy, _load_valences
+from language_dependencies import _negations, _pronouns, _language_code3, _valences
 import re
 import matplotlib.pyplot as plt
+from nltk.corpus import wordnet as wn
+from collections import namedtuple
 
 
-def _wordnet_synonims(vertexlist, edgelist, language, wn, with_type = False):
+def _wordnet_synonims(vertexlist, edgelist, language, with_type = False):
     """
     1. For each word `i` in vertexlist, get all synonims `S_i`
     2. For each pair of word in vertexlist that are synonims, draw an edge
@@ -51,13 +52,11 @@ def _get_edges_vertex(text, spacy_model, language = 'english', keepwords = [], s
     keeppos = ['VERB', 'AUX', 'NOUN', 'PROPN', 'ADJ', 'NUM', 'PRON', 'ADV'] # this goes with .pos_
     
     # Getting or using spacy model
-    nlp = _load_spacy(spacy_model, language)
+    nlp = spacy_model
     
     # get sentences
     nlp.create_pipe('sentencizer')
     sentences = nlp(text).sents
-    
-    print(_negations[language])
     
 
     for sentence in sentences:
@@ -107,7 +106,7 @@ def _get_edges_vertex(text, spacy_model, language = 'english', keepwords = [], s
             # should you keep the word? Yes if it is in keeppos or it is a negation or a pronoun
             keep = (token.pos_ in keeppos)
             # reasons to overtake on keep
-            nokeep = (token.text in stopwords) or (token.is_stop) or bool(re.search('[0-9]', token.text)) # or len(token.text) <= 2 
+            nokeep = (token.text in stopwords) or (token.is_stop) or len(token.text) <= 2 or bool(re.search('[0-9]', token.text))
             # reasons to overtake on everything
             yakeep = (token.text in keepwords) or (token.text in _negations[language]) or (token.text in _pronouns[language])  
             
@@ -137,14 +136,10 @@ def _get_edges_vertex(text, spacy_model, language = 'english', keepwords = [], s
         edgelist = [(a.split('__')[1], b.split('__')[1]) for a, b in edgelist]
 
     vertexlist = list(set([vertex.split('__')[1] for vertex in vertexlist]))
-    edgelist = _wordnet_synonims(vertexlist, edgelist, language, wn, with_type)
+    edgelist = _wordnet_synonims(vertexlist, edgelist, language, with_type)
     edgelist = list(set(edgelist))
     
     
-    if with_type:
-        edgelist = [(a, b, c) for a, b, c in edgelist if a != b]
-    else:
-        edgelist = [(a, b)   for a, b in edgelist if a != b]
     
     return edgelist, vertexlist
 
@@ -185,14 +180,13 @@ def _get_network(edges, vertex, max_distance = 3, with_type = False):
     
 
     
-def _get_formamentis_edgelist(text, 
+def get_formamentis_edgelist(text, 
                              language = 'english', 
                              spacy_model = 'en_core_web_sm',
                              target_word = None,
                              keepwords = [],
                              stopwords = [],
                              antonyms = None,
-                             wn = None,
                              max_distance = 3,
                              with_type = False
                              ):
@@ -245,7 +239,7 @@ def _get_formamentis_edgelist(text,
     text = _clean_text(text)
     edges, vertex = _get_edges_vertex(text = text, spacy_model = spacy_model, language = language, 
                                       keepwords = keepwords, stopwords = stopwords, 
-                                      antonyms = antonyms, wn = wn,
+                                      antonyms = antonyms,
                                       max_distance = max_distance, 
                                       with_type = with_type)
     
@@ -255,20 +249,19 @@ def _get_formamentis_edgelist(text,
     if target_word:
         neighbors = list(set(list(itertools.chain(*[e for e in edges if target_word in e]))))
         
-        if len(neighbors) == 0:
-            raise ValueError("'{}' is not in the input text, the corresponding Formamentis network is empty.".format(target_word))
-        
         if with_type:
             edges = [(a, b, c) for a, b, c in edges if a in neighbors and b in neighbors]
         else:
             edges = [(a, b) for a, b in edges if a in neighbors and b in neighbors]
             
         vertex = list(set.union(set([a for a, _ in edges]), set([b for _, b in edges])))
-        
-    return edges, vertex
+    
+    
+    FormamentisNetwork = namedtuple('FormamentisNetwork', 'edges vertices')
+    return FormamentisNetwork(edges, vertex)
 
 
-def _draw_formamentis(edgelist, language = 'english'):
+def draw_formamentis(edgelist, language = 'english', ax = None):
     """
     
     """
@@ -284,14 +277,18 @@ def _draw_formamentis(edgelist, language = 'english'):
         color = ['grey' for _ in range(len(edgelist))]
     
     # Get positive or negative valences
-    _positive, _negative, _ambivalent = _load_valences(language)
+    _positive, _negative, _ambivalent = _valences(language)
     
     # Prepare the patch effect for bicolor patches
     import matplotlib.patheffects as path_effects
     eff = [path_effects.PathPatchEffect(facecolor='white', edgecolor = 'red', linewidth = 2),
     path_effects.PathPatchEffect(edgecolor='green', linewidth=2.1, facecolor=(0, 0, 0, 0), linestyle = '--')]
     
-    fig, ax = plt.subplots(figsize=(9,9)) 
+    
+    if not ax:
+        _, ax = plt.subplots(figsize=(9,9)) 
+    
+    
     pos = nx.spring_layout(M)
     nx.draw_networkx(M, pos = pos, node_size = 0, with_labels = False, font_size=12, edge_color=color, width=3.5, alpha = 0.5)
     for key, val in pos.items():

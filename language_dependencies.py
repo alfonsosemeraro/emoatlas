@@ -6,6 +6,8 @@ Created on Wed Aug 25 14:07:11 2021
 @author: alfonso
 """
 
+import json
+
 _negations = {
     "german": ['nicht', 'nein'],
     "english": ['no', 'neither', 'not', 'cannot', 'never', "can't", "won't", 'nothing', "don't", "doesn't", "didn't", "n't"], 
@@ -60,6 +62,150 @@ _pronouns = {
 }
 
 
+def _load_emojis( language ):
+    
+    if language == 'english':
+        with open('lexicons/emojis.json', 'r') as fr:
+            return json.load(fr)
+       
+    return {}
+
+
+def _load_dictionary( language ):
+    """
+    It loads the emotional lexicon for the required languages.
+
+    Required arguments:
+    ----------
+    
+    *language*:
+        One of the languages supported by Spacy: 
+            Catalan, Chinese, Danish, Dutch, English, French, German, Greek, Japanese, Italian, Lithuanian,
+            Macedonian, Norvegian, Polish, Portuguese, Romanian, Russian, Spanish.   
+    
+    Returns:
+    ----------
+    *lang_df*:
+        A pandas dataframe: the table that contains the association < word, emotion >.    
+        
+    """
+    
+    if language == 'catalan':
+        from langs.catalan import lang_df
+        
+    elif language == 'chinese':
+        from langs.chinese import lang_df
+        
+    elif language == 'danish':
+        from langs.danish import lang_df
+        
+    elif language == 'dutch':
+        from langs.dutch import lang_df
+        
+    elif language == 'english':
+        from langs.english import lang_df
+        
+    elif language == 'french':
+        from langs.french import lang_df
+        
+    elif language == 'german':
+        from langs.german import lang_df
+        
+    elif language == 'greek':
+        from langs.greek import lang_df
+        
+    elif language == 'italian':
+        from langs.italian import lang_df
+        
+    elif language == 'japanese':
+        from langs.japanese import lang_df
+        
+    elif language == 'lithuanian':
+        from langs.lithuanian import lang_df
+        
+    elif language == 'norwegian':
+        from langs.norwegian import lang_df
+        
+    elif language == 'polish':
+        from langs.polish import lang_df
+        
+    elif language == 'portuguese':
+        from langs.portuguese import lang_df
+        
+    elif language == 'romanian':
+        from langs.romanian import lang_df
+        
+    elif language == 'russian':
+        from langs.russian import lang_df
+        
+    elif language == 'spanish':
+        from langs.spanish import lang_df
+        
+    elif language == 'macedonian':
+        from langs.macedonian import lang_df
+        
+    return lang_df
+
+
+
+
+def _valences(language):
+    
+    if language == 'catalan':
+        from valence.catalan import _positive, _negative, _ambivalent
+        
+    elif language == 'chinese':
+        from valence.chinese import _positive, _negative, _ambivalent
+        
+    elif language == 'danish':
+        from valence.danish import _positive, _negative, _ambivalent
+        
+    elif language == 'dutch':
+        from valence.dutch import _positive, _negative, _ambivalent
+        
+    elif language == 'english':
+        from valence.english import _positive, _negative, _ambivalent
+        
+    elif language == 'french':
+        from valence.french import _positive, _negative, _ambivalent
+        
+    elif language == 'german':
+        from valence.german import _positive, _negative, _ambivalent
+        
+    elif language == 'greek':
+        from valence.greek import _positive, _negative, _ambivalent
+        
+    elif language == 'italian':
+        from valence.italian import _positive, _negative, _ambivalent
+        
+    elif language == 'japanese':
+        from valence.japanese import _positive, _negative, _ambivalent
+        
+    elif language == 'lithuanian':
+        from valence.lithuanian import _positive, _negative, _ambivalent
+        
+    elif language == 'norwegian':
+        from valence.norwegian import _positive, _negative, _ambivalent
+        
+    elif language == 'polish':
+        from valence.polish import _positive, _negative, _ambivalent
+        
+    elif language == 'portuguese':
+        from valence.portuguese import _positive, _negative, _ambivalent
+        
+    elif language == 'romanian':
+        from valence.romanian import _positive, _negative, _ambivalent
+        
+    elif language == 'russian':
+        from valence.russian import _positive, _negative, _ambivalent
+        
+    elif language == 'spanish':
+        from valence.spanish import _positive, _negative, _ambivalent
+        
+    elif language == 'macedonian':
+        from valence.macedonian import _positive, _negative, _ambivalent
+        
+    return _positive, _negative, _ambivalent
 
 
 def _language_code3(language):

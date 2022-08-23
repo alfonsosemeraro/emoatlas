@@ -516,10 +516,10 @@ def _petal_spine_dyad(ax, dyad, dyad_score, color, emotion_names, angle, font, f
     # Labels over the arcs 
     angle2 = angle + 180 if -110 > angle > -260 else angle
     p9 = _rotate_point((0, 1.7), angle - 9)
-    ax.annotate(s = emotion_names[1], xy = p9, rotation = angle2 - 8, ha='center', va = 'center', zorder = 30,
+    ax.annotate(text = emotion_names[1], xy = p9, rotation = angle2 - 8, ha='center', va = 'center', zorder = 30,
                 fontfamily = font, size = fontsize * .7, fontweight = 'demibold', color = color[1])
     p10 = _rotate_point((0, 1.7), angle + 9)
-    ax.annotate(s = emotion_names[0], xy = p10, rotation = angle2 + 8, ha='center', va = 'center',  zorder = 30,
+    ax.annotate(text = emotion_names[0], xy = p10, rotation = angle2 + 8, ha='center', va = 'center',  zorder = 30,
                 fontfamily = font, size = fontsize * .7, fontweight = 'demibold', color = color[0])
     
     
@@ -529,12 +529,12 @@ def _petal_spine_dyad(ax, dyad, dyad_score, color, emotion_names, angle, font, f
     # Label
     angle2 = angle + 180 if -110 > angle > -260 else angle
     p4 = _rotate_point((0, 1.23 + step + offset), angle)
-    ax.annotate(s = dyad, xy = p4, rotation = angle2, ha='center', va = 'center',
+    ax.annotate(text = dyad, xy = p4, rotation = angle2, ha='center', va = 'center',
                 fontfamily = font, size = fontsize, fontweight = fontweight)
     
     # Score
     p5 = _rotate_point((0, 1.1 + step + offset), angle)
-    ax.annotate(s = "{0:.2f}".format(round(dyad_score,2)), xy = p5, rotation = angle2, ha='center', va = 'center',
+    ax.annotate(text = "{0:.2f}".format(round(dyad_score,2)), xy = p5, rotation = angle2, ha='center', va = 'center',
                 color = color, fontfamily = font, size = fontsize, fontweight = 'demibold', alpha = alpha)
     
     
