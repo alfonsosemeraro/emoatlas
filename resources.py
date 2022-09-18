@@ -24,70 +24,43 @@ def _load_dictionary( language ):
         A pandas dataframe: the table that contains the association < word, emotion >.    
         
     """
-    
-    if language == 'catalan':
-        from langs.catalan import lang_df
-        
-    elif language == 'chinese':
-        from langs.chinese import lang_df
-        
-    elif language == 'danish':
-        from langs.danish import lang_df
-        
-    elif language == 'dutch':
-        from langs.dutch import lang_df
-        
-    elif language == 'english':
-        from langs.english import lang_df
-        
-    elif language == 'french':
-        from langs.french import lang_df
-        
-    elif language == 'german':
-        from langs.german import lang_df
-        
-    elif language == 'greek':
-        from langs.greek import lang_df
-        
-    elif language == 'italian':
-        from langs.italian import lang_df
-        
-    elif language == 'japanese':
-        from langs.japanese import lang_df
-        
-    elif language == 'lithuanian':
-        from langs.lithuanian import lang_df
-        
-    elif language == 'norwegian':
-        from langs.norwegian import lang_df
-        
-    elif language == 'polish':
-        from langs.polish import lang_df
-        
-    elif language == 'portuguese':
-        from langs.portuguese import lang_df
-        
-    elif language == 'romanian':
-        from langs.romanian import lang_df
-        
-    elif language == 'russian':
-        from langs.russian import lang_df
-        
-    elif language == 'spanish':
-        from langs.spanish import lang_df
-        
-    elif language == 'macedonian':
-        from langs.macedonian import lang_df
-        
-    else:
+    try:
+        with open(f"langs/{language}.json", 'r') as fr:
+            lang_df = json.load(fr)
+
+    except:
         raise ValueError("Language not supported.")
         
-    lang_df = lang_df.sort_values('emotion').reset_index()
-    del lang_df['index']
-    
-    lang_df = lang_df.groupby('word')['emotion'].apply(list).to_dict()
-        
     return lang_df
+
+
+def _load_idiomatic_tokens( language ):
+    """
+    It loads the lexicon of replacements of idiomatic expressions with tokens, for the required languages.
+
+    Required arguments:
+    ----------
+    
+    *language*:
+        One of the languages supported by Spacy: 
+            Catalan, Chinese, Danish, Dutch, English, French, German, Greek, Japanese, Italian, Lithuanian,
+            Macedonian, Norvegian, Polish, Portuguese, Romanian, Russian, Spanish.   
+    
+    Returns:
+    ----------
+    *idiomatic_tokens*:
+        A dict: the replacements with < idiomatic_expression, token >.    
+        
+    """
+    try:
+        with open(f"langs/{language}_idiomatic_tokens.json", 'r') as fr:
+            idiomatic_tokens = json.load(fr)
+
+    except:
+        raise ValueError("Language not supported.")
+        
+    return idiomatic_tokens
+
 
 
 

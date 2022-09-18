@@ -74,7 +74,7 @@ def _get_edges_vertex(text, spacy_model, language = 'english', keepwords = [], s
         tokens = [token for _, token in tokens]    
         
         for token in tokens:
-        
+                        
             #lemmatization
             stem = token.lemma_
             stem_head = token.head.lemma_
@@ -188,7 +188,8 @@ def get_formamentis_edgelist(text,
                              stopwords = [],
                              antonyms = None,
                              max_distance = 3,
-                             with_type = False
+                             with_type = False,
+                             idiomatic_tokens = None
                              ):
     """
     FormaMentis edgelist from input text.
@@ -237,6 +238,7 @@ def get_formamentis_edgelist(text,
     
     
     text = _clean_text(text)
+        
     edges, vertex = _get_edges_vertex(text = text, spacy_model = spacy_model, language = language, 
                                       keepwords = keepwords, stopwords = stopwords, 
                                       antonyms = antonyms,

@@ -7,7 +7,9 @@ import re
 from language_dependencies import _check_language
 import itertools
 
-
+def multiple_replace(string, rep_dict):
+    pattern = re.compile("|".join([re.escape(k) for k in sorted(rep_dict,key=len,reverse=True)]), flags=re.DOTALL)
+    return pattern.sub(lambda x: rep_dict[x.group(0)], string)
 
 def _clean_text(text):
     """ Preliminary text cleaning: removing weird punctuation from words, stripping spaces. """
@@ -24,20 +26,27 @@ def _clean_text(text):
     text = text.lower()
     text = re.sub('\<u\+[0-9A-Za-z]+\>', '', text)
     text = text.strip()
+    
+       
     return text
 
 
 
 
-def _load_text(text, language, tagger):
+def _load_text(text, language, tagger, idiomatic_tokens):
     
     """ Loads a wordlist from a text. """
-    
-     # clean text
+        
+    # clean text
     text = _clean_text(text)
     
     # Check for language
     _check_language(language)
+    
+    
+    # replace idiomatic expressions with tokens
+    if language != 'english':
+        text = multiple_replace(text, idiomatic_tokens)
     
     # get tokens
     tokens = [token.lemma_ for token in tagger(text)]
@@ -52,7 +61,8 @@ def _load_object(obj,
                 tagger,
                 language,
                 emojis_dict,
-                convert_emojis):
+                convert_emojis,
+                idiomatic_tokens):
     
     """ Checks the format of the input, then loads the wordlist in the right way. """
     
@@ -76,8 +86,8 @@ def _load_object(obj,
         
     if convert_emojis:
         text = _convert_emojis(text, emojis_dict)
-        
-    wordlist = _load_text(text = text, tagger = tagger, language = language)
+                
+    wordlist = _load_text(text = text, tagger = tagger, language = language, idiomatic_tokens = idiomatic_tokens)
     
     
     return wordlist

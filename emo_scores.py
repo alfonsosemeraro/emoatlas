@@ -18,14 +18,16 @@ def _get_emotions(obj,
                    emotions,
                    return_words,
                    emojis_dict,
-                   convert_emojis):
+                   convert_emojis,
+                   idiomatic_tokens):
     
         
     wordlist = _txl._load_object(obj = obj,
                            language = language,
                            tagger = tagger,
                            emojis_dict = emojis_dict, 
-                           convert_emojis = convert_emojis)
+                           convert_emojis = convert_emojis,
+                           idiomatic_tokens = idiomatic_tokens)
         
     # word-emotion pairs
     emowords = [[(w, emo) for emo in emotion_lexicon[w]] for w in wordlist if w in emotion_lexicon]
@@ -36,6 +38,11 @@ def _get_emotions(obj,
     emowords = {emo: {'count': len(emo_words), 'words': emo_words} for emo, emo_words in emowords.items()}
     
     if return_words:
+        
+        if language != 'english':
+            reverse_id_tok = {val: key for key, val in idiomatic_tokens.items()}
+            for emo in emowords:
+                emowords[emo]['words'] = [reverse_id_tok[w] if w in reverse_id_tok else w for w in emowords[emo]['words']]
         return emowords
     
     else:
@@ -65,11 +72,13 @@ def _zscores(obj,
              emotions,
              lookup,
              emojis_dict,
-             convert_emojis):
+             convert_emojis,
+             idiomatic_tokens):
     
     emotion_words = _get_emotions(obj = obj, emotion_lexicon = emotion_lexicon, language = language, 
                                    normalization_strategy = 'none', tagger = tagger, emotions = emotions,
-                                   return_words = True, emojis_dict = emojis_dict, convert_emojis = convert_emojis)
+                                   return_words = True, emojis_dict = emojis_dict, convert_emojis = convert_emojis,
+                                   idiomatic_tokens = idiomatic_tokens)
     
     # # text_emo: 'joy': 'L'
     # S = sum([emotion_words[emo]['count'] for emo in emotions])

@@ -3,7 +3,7 @@
 
 """
 
-from resources import _load_spacy, _load_dictionary, _load_emojis, _load_antonyms
+from resources import _load_spacy, _load_dictionary, _load_emojis, _load_antonyms, _load_idiomatic_tokens
 import formamentis_edgelist as fme
 import emo_scores as es
 import baselines as bsl
@@ -24,6 +24,7 @@ class EmoScores:
         self.tagger = _load_spacy(language)
         self.emotionlist = None
         self.emojis_dict = _load_emojis(language)
+        self.idiomatic_tokens = _load_idiomatic_tokens(language)
         
         # Formamentis imports
         self.antonyms = _load_antonyms(language)        
@@ -98,7 +99,8 @@ class EmoScores:
                        emotions = self.emotionslist,
                        return_words = return_words,
                        emojis_dict = self.emojis_dict,
-                       convert_emojis = convert_emojis)
+                       convert_emojis = convert_emojis,
+                       idiomatic_tokens = self.idiomatic_tokens)
         
     
    
@@ -157,7 +159,8 @@ class EmoScores:
                            emotions = self.emotionslist,
                            lookup = self.lookup,
                            emojis_dict = self.emojis_dict,
-                           convert_emojis = convert_emojis)
+                           convert_emojis = convert_emojis,
+                           idiomatic_tokens = self.idiomatic_tokens)
         
   
     def formamentis_network(self, 
@@ -217,7 +220,8 @@ class EmoScores:
                                      stopwords = stopwords,
                                      antonyms = self.antonyms,
                                      max_distance = max_distance,
-                                     with_type = with_type
+                                     with_type = with_type,
+                                     idiomatic_tokens = self.idiomatic_tokens
                                      )
         
     
