@@ -45,7 +45,7 @@ def _load_text(text, language, tagger, idiomatic_tokens):
     
     
     # replace idiomatic expressions with tokens
-    if language != 'english':
+    if language != 'english' and idiomatic_tokens:
         text = multiple_replace(text, idiomatic_tokens)
     
     # get tokens

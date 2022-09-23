@@ -42,8 +42,8 @@ class EmoScores:
         
     def set_baseline(self, baseline = None):
         """
-        Set as a baseline emotion distribution the inputed baseline. 
-        If no baseline is inputed, a new one will be created from the default emotion lexicon loaded.
+        Set a new emotion distribution as baseline to compute zscores. 
+        If no baseline is provided, a new one will be created from the default emotion lexicon loaded.
         
         Required arguments:
         ----------
@@ -55,7 +55,8 @@ class EmoScores:
             If baseline is None, it will be computed the emotion distribution of the default emotion lexicon loaded.
             
         """
-        self.baseline = bsl._make_baseline(baseline, emotion_lexicon = self.emotion_lexicon, tagger = self.tagger)
+        self.baseline = bsl._make_baseline(baseline, emotion_lexicon = self.emotion_lexicon, tagger = self.tagger,
+                                          emojis_dict = self.emojis_dict, idiomatic_tokens = self.idiomatic_tokens)
         self.lookup = {}
         
     
@@ -67,7 +68,7 @@ class EmoScores:
                  convert_emojis = True):
         
         """
-        Count emotions in an inputed text or formamentis network.
+        Count emotions in an input text or Formamentis Network.
         
         Required arguments:
         ----------
@@ -81,7 +82,12 @@ class EmoScores:
                 'none': no normalization at all
                 'text_lenght': normalize emotion counts over the total text length
                 'emotion_words': normalize emotion counts over the number of words associated to an emotion
-                
+        
+        *return_words*:
+            A bool. Whether to return a list of the words associated with each of the emotions, or just their count.
+            
+        *convert_emojis*:
+            A bool. Whether to convert emojis in raw text to be processed, or not.
        
                 
         Returns:
@@ -113,15 +119,14 @@ class EmoScores:
                 convert_emojis = True):
         
         """
-        Checks the emotion distribution in an inputed text or formamentis network against a baseline, and return the z-scores.
+        Checks the emotion distribution in an input text or Formamentis Network against a baseline, and returns the z-scores.
         
         Required arguments:
         ----------
               
         *obj*:
             Either a string or a list of tuples, with the former being the text to extract emotion from, 
-            and the latter being the standard representation of a formamentis edgelist.
-            
+            and the latter being the standard representation of a formamentis edgelist.            
             
         *baseline*:
             Either a list of lists, a text, or None.
@@ -132,7 +137,10 @@ class EmoScores:
         *n_samples*:
             An integer, how many time the baseline emotion distribution will be sampled before checking for z-scores.
             Default is 300.
-                
+            
+        *convert_emojis*:
+            A bool. Whether to convert emojis in raw text to be processed, or not.
+            
         Returns:
         ----------
         *z-scores*:
@@ -172,7 +180,7 @@ class EmoScores:
                             with_type = False
                          ):
         """
-        FormaMentis edgelist from input text.
+        Extract a Formamentis Network from input text.
         
         Required arguments:
         ----------
@@ -202,11 +210,8 @@ class EmoScores:
             
         Returns:
         ----------
-        *edges*:
-            A list of 2-items tuples, defining the edgelist of the formamentis network.
-        
-        *vertex*:
-            A list of string, defining the list of vertices of the network.
+        *fmn*:
+            A Formamentis Network in the form of (Edges, Vertices).
             
         """
         
@@ -226,12 +231,59 @@ class EmoScores:
         
     
     def draw_formamentis(self, fmn, layout = 'edge_bundling', highlight = [], ax = None):
+        """
+        Represents a Formamentis Network in either a circular or force-based layout.
+            
+        Required arguments:
+        ----------
+        
+        *fmn*:
+            A Formamentis Network to visualize.
+            
+        *layout*:
+            A str. Either "edge_bundling" for circular layout or "force_layout" for force-based layout.
+            
+        *highlight*:
+            A list of the words to highlight in the network.
+        
+        *ax*:
+            A matplotlib axes to draw the network on. If none is provided, a new one will be created.
+            
+        """
         
         if layout == 'force_layout':
             dff.draw_formamentis_force_layout(fmn.edges, highlight = highlight, language = self.language, ax = ax)
         elif layout == 'edge_bundling':
             dfb.draw_formamentis_circle_layout(fmn, highlight = highlight, language = self.language, ax = ax)
             
+            
+            
+    def draw_statistically_significant_emotions(self,
+                                                obj, 
+                                                reject_range = (-1.96, 1.96)):
+        """
+        Computes how statistically significantly higher or lower is each emotion in the input text or Formamentis Network. 
+        It draws the Plutchik's flower highlighting only emotions over/under represented w.r.t. a neutral baseline.
+        This function is a wrapper of
+            zs = zscores(obj)
+            draw_plucthik(zs, reject_range = (-1.96, 1.96))
+            
+        Required arguments:
+        ----------
+        
+        *obj*:
+            A str or a Formamentis Network to search emotions in.
+            
+        *reject_range*:
+            A threshold for significance of zscores. A zscore higher (lower) than 1.96 (-1.96) means that an emotion is 
+            statistically over (under) represented (p-value = 0.05).
+        """
+        
+        zs = self.zscores(obj)
+        self.draw_plutchik(zs, reject_range = (-1.96, 1.96))
+        
+        
+        
         
     def draw_plutchik(self, scores,
              ax = None,

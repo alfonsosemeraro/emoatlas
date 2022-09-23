@@ -12,11 +12,21 @@ import textloader as _load_object
 from collections import Counter
 import pickle
 
-def _make_baseline(baseline = None, tagger = None, language = 'english', emotion_lexicon = None):
+def _make_baseline(baseline = None, tagger = None, language = 'english', 
+                   emojis_dict = {}, idiomatic_tokens = {},
+                   emotion_lexicon = None,):
            
     if baseline:
         # extract all words from the input baseline
-        wordlist = _load_object(baseline = baseline, tagger = tagger, language = language)
+        wordlist = _load_object(baseline = baseline, 
+                               language = language,
+                               tagger = tagger,
+                               emojis_dict = emojis_dict, 
+                               convert_emojis = convert_emojis,
+                               idiomatic_tokens = idiomatic_tokens)
+        
+        
+                           
         
         # check into the lexicon the emotions associated
         emotions = [emotion_lexicon[w] for w in wordlist]
