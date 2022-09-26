@@ -458,7 +458,8 @@ def _check_values(scores, rescale, reject_range):
         # min_score -= emo_diff*.1
         # max_score += emo_diff*.1
         # rescale = (min_score, max_score)
-        rescale = (-2.5*abs_max, 2.5*abs_max)
+        abs_max = max([reject_range[1], abs_max, abs(reject_range[0])])
+        rescale = (-1.5*abs_max, 1.5*abs_max)
         
     # Case B: users tell a reject_range, and they decide a normalization scale: we check correctness
     elif rescale and reject_range:
