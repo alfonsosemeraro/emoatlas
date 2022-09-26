@@ -3,7 +3,7 @@
 
 """
 
-from resources import _load_spacy, _load_dictionary, _load_emojis, _load_antonyms, _load_idiomatic_tokens
+from resources import _load_spacy, _load_dictionary, _load_emojis, _load_antonyms, _load_idiomatic_tokens, _load_stemmer
 import formamentis_edgelist as fme
 import emo_scores as es
 import baselines as bsl
@@ -38,7 +38,16 @@ class EmoScores:
             self.emotion_model = 'plutchik'
         
         
+    def set_stemming_lemming(self, stem_or_lem = 'lemmatization'):
         
+        self.emotion_lexicon = _load_dictionary(self.language, stem_or_lem)
+        self.idiomatic_tokens = _load_idiomatic_tokens(self.language, stem_or_lem)
+        
+        if stem_or_lem == 'lemmatization':
+            self.tagger = _load_spacy(self.language)  
+        elif stem_or_lem == 'stemming':
+            self.tagger = _load_stemmer(self.language)
+         
         
     def set_baseline(self, baseline = None):
         """

@@ -6,6 +6,7 @@
 import re
 from language_dependencies import _check_language
 import itertools
+from nltk import word_tokenize
 
 def multiple_replace(string, rep_dict):
     pattern = re.compile("|".join([re.escape(k) for k in sorted(rep_dict,key=len,reverse=True)]), flags=re.DOTALL)
@@ -49,7 +50,10 @@ def _load_text(text, language, tagger, idiomatic_tokens):
         text = multiple_replace(text, idiomatic_tokens)
     
     # get tokens
-    tokens = [token.lemma_ for token in tagger(text)]
+    if 'snowballstemmer' in str(tagger).lower():
+        tokens = [tagger.stem(token) for token in word_tokenize(text)]
+    elif 'spacy' in str(tagger).lower():
+        tokens = [token.lemma_ for token in tagger(text)]
         
     
     return tokens

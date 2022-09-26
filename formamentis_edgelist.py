@@ -246,6 +246,9 @@ def get_formamentis_edgelist(text,
                                       with_type = with_type)
     
     # TODO: synonims from WordNet
+    print("BEFORE:", edges)
+    edges = _wordnet_synonims(vertex, edges, language, with_type)
+    print("AFTER:", edges)
     
     # target words!
     if target_word:
