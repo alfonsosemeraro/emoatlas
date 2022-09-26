@@ -230,6 +230,9 @@ class EmoScores:
                                      )
         
     
+    
+    
+    
     def draw_formamentis(self, fmn, layout = 'edge_bundling', highlight = [], ax = None):
         """
         Represents a Formamentis Network in either a circular or force-based layout.
@@ -255,6 +258,10 @@ class EmoScores:
             dff.draw_formamentis_force_layout(fmn.edges, highlight = highlight, language = self.language, ax = ax)
         elif layout == 'edge_bundling':
             dfb.draw_formamentis_circle_layout(fmn, highlight = highlight, language = self.language, ax = ax)
+            
+            
+            
+            
             
             
             
@@ -284,7 +291,66 @@ class EmoScores:
         
         
         
+    
+    def draw_formamentis_flower(self,
+                                text,
+                                target_word = None,
+                                keepwords = [],
+                                stopwords = [],
+                                max_distance = 3, 
+                                reject_range = (-1.96, 1.96)):
         
+        """
+        Draw a Plutchik's wheel of emotions based on a Formamentis Network built upon input text.
+        This function is a wrapper of
+            fmn = formamentis_network(text, target_word = target_word)
+            zs = zscores(fmn)
+            draw_plutchik(zs, reject_range = (-1.96, 1.96))
+        
+        Required arguments:
+        ----------
+              
+        *text*:
+            A string, the text to extract the Formamentis_Network from.
+            
+        *target_word*:
+            A string or None. If a string and method is 'formamentis', it will be computed the emotion distribution
+            only of the neighborhood of 'target_word' in the formamentis network.
+            
+        *keepwords*:
+            A list. Words that shall be included in formamentis networks regardless from their part of speech. Default is an empty list.
+            By default implementation, a pre-compiled list of negations and pronouns will be loaded and used as keepwords.
+            
+        *stopwords*:
+            A list. Words that shall be discarded from formamentis networks regardless from their part of speech. Default is an empty list.
+            If a word is both in stopwords and in keepwords, the word will be discarded.
+            
+        *max_distance*:
+            An integer, by default 2. Links in the formamentis network will be established from each word to each neighbor within a distance
+            defined by max_distance.
+            
+        *reject_range*:
+            A threshold for significance of zscores. A zscore higher (lower) than 1.96 (-1.96) means that an emotion is 
+            statistically over (under) represented (p-value = 0.05).
+            
+        """    
+    
+        fmn = fme.get_formamentis_edgelist(text, 
+                                     language = self.language, 
+                                     spacy_model = self.tagger,
+                                     target_word = target_word,
+                                     keepwords = keepwords,
+                                     stopwords = stopwords,
+                                     antonyms = self.antonyms,
+                                     max_distance = max_distance,
+                                     with_type = False,
+                                     idiomatic_tokens = self.idiomatic_tokens
+                                     )
+        zs = self.zscores(fmn)
+        self.draw_plutchik(zs, reject_range = (-1.96, 1.96))
+    
+    
+    
     def draw_plutchik(self, scores,
              ax = None,
              rescale = False,
