@@ -5,6 +5,9 @@
 
 import spacy
 import json
+import os
+
+PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 def _load_dictionary( language ):
     """
@@ -25,7 +28,8 @@ def _load_dictionary( language ):
         
     """
     try:
-        with open(f"langs/{language}.json", 'r') as fr:
+
+        with open(os.path.join(PROJECT_ROOT, f"langs/{language}.json"), 'r') as fr:
             lang_df = json.load(fr)
 
     except:
@@ -53,7 +57,7 @@ def _load_idiomatic_tokens( language ):
         
     """
     try:
-        with open(f"langs/{language}_idiomatic_tokens.json", 'r') as fr:
+        with open(os.path.join(PROJECT_ROOT, f"langs/{language}_idiomatic_tokens.json"), 'r') as fr:
             idiomatic_tokens = json.load(fr)
 
     except:
@@ -179,7 +183,7 @@ def _emotion_model_resources(emotion_lexicon = None, emotion_model = 'plutchik',
 def _load_emojis( language ):
     
     if language == 'english':
-        with open('lexicons/emojis.json', 'r') as fr:
+        with open(os.path.join(PROJECT_ROOT, 'lexicons/emojis.json'), 'r') as fr:
             return json.load(fr)
        
     return {}
