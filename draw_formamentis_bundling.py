@@ -200,9 +200,13 @@ def draw_formamentis_circle_layout(fmn, highlight = [], language = 'english', ax
         lws.append(linewidth)
         zors.append(zorder)
         
+    print("ALPHAS: ", type(alphas[0]), len(alphas), alphas)
+    print([type(i) for i in alphas])
+    print("lw: ", type(lws[0]),  len(lws), lws)
         
     patches = PatchCollection(patches, facecolor = 'none', linewidth = lws, edgecolor = colors, 
-                                  match_original=True, alpha = alphas, zorder = 1, linewidths = lws)
+                                  match_original=True, alpha=alphas, zorder = 1, linewidths = lws)
+
     ax.add_collection(patches)
     
     
