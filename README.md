@@ -7,6 +7,12 @@ emolib installs with pip:
 ```
 ~$ pip install git+https://github.com/alfonsosemeraro/emolib
 ```
+then install the relevant language using:
+
+```
+~$ python -m spacy download en_core_web_lg
+```
+the command above installs English, but a list of possible language codes can be found [here](https://spacy.io/usage/models), and different languages installed by changing `en` in the final argument to one of the listed language codes. 
 
 **Main Features:**
   - Extraction of emotions from texts in multiple languages
