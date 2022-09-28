@@ -14,6 +14,8 @@ then install the relevant language using:
 ```
 the command above installs English, but a list of possible language codes can be found [here](https://spacy.io/usage/models), and different languages installed by changing `en` in the final argument to one of the listed language codes. 
 
+Running the files in `demos/` additionally requires [jupyter notebook](https://github.com/jupyter/notebook)
+
 **Main Features:**
   - Extraction of emotions from texts in multiple languages
   - Statistical significance of emotions distribution
