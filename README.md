@@ -1,6 +1,21 @@
 # emolib
 A Python library for the detection and visualization of emotions in texts, coming soon with the first release ✨
 
+**Installation:**
+emolib installs with pip:
+
+```
+~$ pip install git+https://github.com/alfonsosemeraro/emolib
+```
+then install the relevant language using:
+
+```
+~$ python -m spacy download en_core_web_lg
+```
+the command above installs English, but a list of possible language codes can be found [here](https://spacy.io/usage/models), and different languages installed by changing `en` in the final argument to one of the listed language codes. 
+
+Running the files in `demos/` additionally requires [jupyter notebook](https://github.com/jupyter/notebook)
+
 **Main Features:**
   - Extraction of emotions from texts in multiple languages
   - Statistical significance of emotions distribution
@@ -13,6 +28,8 @@ Emolib is a Python library that checks against the input text, after having enri
 It has already been used for our analysis of the [semantic and emotional frames around COVID-19 vaccines](https://arxiv.org/abs/2201.07538), repository [here](https://github.com/alfonsosemeraro/vaccines-and-press).
 Check out our analysis of the emotional content of the [Festival di Sanremo 2022](https://arcs.di.unito.it/2022/02/04/i-fiori-di-sanremo/) songs! 
 
+**Usage**
+see the jupyter notebooks in `demos/` for examples of how to use emolib.
 
 Authors: 
 
@@ -20,3 +37,4 @@ Authors:
 **SALVATORE VILELLA**: University of Turin, ARC²S Group [🎓 ](https://scholar.google.it/citations?user=zQFTgBEAAAAJ) [🐦](https://twitter.com/sal_vilella) <br/>
 **GIANCARLO RUFFO**: University of Turin, ARC²S Group [🎓 ](https://scholar.google.it/citations?user=tTIeDa4AAAAJ) [🐦](https://twitter.com/giaruffo) <br/>
 **MASSIMO STELLA**: University of Exeter, CogNosco Lab [🎓 ](https://scholar.google.it/citations?user=TUJkCbkAAAAJ) [🐦](https://twitter.com/MassimoSt) <br/>
+13
