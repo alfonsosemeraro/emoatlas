@@ -4,7 +4,7 @@ setuptools.setup(
     name="emolib",
     version="0.0.1",
     description="installable version of emolib to improve usability",
-    packages=setuptools.find_packages(),
+    packages=["."],
     install_requires=[
         'matplotlib>=3.5.31',
         'spacy>=3.4.1',
