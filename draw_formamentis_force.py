@@ -85,7 +85,7 @@ def _hex_to_rgb(value):
 
 
 def _edge_color(w1, w2, _positive, _negative, _ambivalent, colz):
-    if w1 in _positive and w1 in _positive:
+    if w1 in _positive and w2 in _positive:
         return colz['positive']
     if w1 in _negative and w2 in _negative:
         return colz['negative']
@@ -105,7 +105,8 @@ def draw_formamentis_force_layout(edgelist, highlight = [], language = 'english'
     
     # Define color-blind palette
     colz = {'positive': (26/256, 133/256, 255/256),
-            'negative': (212/256, 17/256, 89/256)}
+            'negative': (212/256, 17/256, 89/256),
+            'semantic': (34/256, 139/256, 34/256)}
     
     # Get positive or negative valences
     _positive, _negative, _ambivalent = _valences(language)
@@ -119,14 +120,24 @@ def draw_formamentis_force_layout(edgelist, highlight = [], language = 'english'
         
         
     # Build the Graph
+    if len(edgelist[0]) > 2:
+        edge_type = [c for a, b, c in edgelist]
+        edgelist = [(a, b) for a, b, c in edgelist]
+    else:
+        edge_type = ['syntactic']*len(edgelist)
+        
     edgelist = [(a, b) for a, b in edgelist if a != b]    
+    
+    
     G = nx.Graph(edgelist)
      
     # Clusters and centroids
     louv = commlouv.best_partition(G)    
     comms = set(louv.values())
-    eps = 2 / (len(comms) - 2)
-    
+    try:
+        eps = 2 / (len(comms) - 2)
+    except:
+        eps = 1
     
     # Positions
     centroids = _initial_positions(len(comms), eps)
@@ -147,19 +158,30 @@ def draw_formamentis_force_layout(edgelist, highlight = [], language = 'english'
     # Draw EDGES :: Bezier curves
     
     patches = []
-    
-    for x, y in G.edges():
+    colors = []
+    j = 0
+    for x, y in edgelist:
+        
+        if edge_type[j] == 'semantic':
+            color = colz['semantic']
+        else:
+            color = _edge_color(x, y, _positive, _negative, _ambivalent, colz)
+        
         if louv[x] != louv[y]:
             
             c1 = centroids[louv[x]]
             c2 = centroids[louv[y]]
             patches.append(_compute_link(pos[x], pos[y], c1, c2))
+            colors.append(color)
     
         else:
-            plt.plot([pos[x][0], pos[y][0]], [pos[x][1], pos[y][1]], color = 'lightgrey', 
+            plt.plot([pos[x][0], pos[y][0]], [pos[x][1], pos[y][1]], color = color, 
                      linewidth = 1, alpha = .1, zorder = -1)
+        
+        j += 1
     
-    patches = PatchCollection(patches, facecolor = 'none', linewidth = 1, edgecolor = 'lightgrey', 
+    
+    patches = PatchCollection(patches, facecolor = 'none', linewidth = 1, edgecolor = colors, 
                               match_original=True, alpha = .3, zorder = 0)
     ax.add_collection(patches)
     

@@ -258,34 +258,34 @@ def _petal_spine_emotion(ax, emotion, emotion_score, color, angle, font, fontwei
         # Label
         angle2 = angle + 180 if -110 > angle > -260 else angle
         p4 = _rotate_point((0, 1.40 + step + offset), angle)
-        ax.annotate(emotion, xy = p4, rotation = angle2, ha='center', va = 'center',
+        ax.annotate(text = emotion, xy = p4, rotation = angle2, ha='center', va = 'center',
                     fontfamily = font, size = fontsize, fontweight = fontweight)
         
         # Score 1
         p5 = _rotate_point((0, 1.07 + step + offset), angle)
-        ax.annotate("{0:.2f}".format(round(emotion_score[0],2)), xy = p5, rotation = angle2, ha='center', va = 'center',
+        ax.annotate(text = "{0:.2f}".format(round(emotion_score[0],2)), xy = p5, rotation = angle2, ha='center', va = 'center',
                     color = color, fontfamily = font, size = fontsize, fontweight = 'regular', alpha = alpha)
         
         # Score 2
         p6 = _rotate_point((0, 1.17 + step + offset), angle)
-        ax.annotate("{0:.2f}".format(round(emotion_score[1],2)), xy = p6, rotation = angle2, ha='center', va = 'center',
+        ax.annotate(text = "{0:.2f}".format(round(emotion_score[1],2)), xy = p6, rotation = angle2, ha='center', va = 'center',
                     color = color, fontfamily = font, size = fontsize, fontweight = 'demibold', alpha = alpha)
         
         # Score 3
         p7 = _rotate_point((0, 1.27 + step + offset), angle)
-        ax.annotate("{0:.2f}".format(round(emotion_score[2],2)), xy = p7, rotation = angle2, ha='center', va = 'center',
+        ax.annotate(text = "{0:.2f}".format(round(emotion_score[2],2)), xy = p7, rotation = angle2, ha='center', va = 'center',
                     color = color, fontfamily = font, size = fontsize, fontweight = 'regular', alpha = alpha)        
         
     else:  
         # Label
         angle2 = angle + 180 if -110 > angle > -260 else angle
         p4 = _rotate_point((0, 1.23 + step + offset), angle)
-        ax.annotate(emotion, xy = p4, rotation = angle2, ha='center', va = 'center',
+        ax.annotate(text = emotion, xy = p4, rotation = angle2, ha='center', va = 'center',
                     fontfamily = font, size = fontsize, fontweight = fontweight)
         
         # Score
         p5 = _rotate_point((0, 1.1 + step + offset), angle)
-        ax.annotate("{0:.2f}".format(round(emotion_score,2)), xy = p5, rotation = angle2, ha='center', va = 'center',
+        ax.annotate(text = "{0:.2f}".format(round(emotion_score,2)), xy = p5, rotation = angle2, ha='center', va = 'center',
                     color = color, fontfamily = font, size = fontsize, fontweight = 'demibold', alpha = alpha)
         
 

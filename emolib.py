@@ -20,34 +20,36 @@ class EmoScores:
         
         # Basic imports
         self.language = language
-        self.emotion_lexicon = _load_dictionary(language)
-        self.tagger = _load_spacy(language)
-        self.emotionlist = None
-        self.emojis_dict = _load_emojis(language)
-        self.idiomatic_tokens = _load_idiomatic_tokens(language)
+        self._emotion_lexicon = _load_dictionary(language)
+        self._tagger = _load_spacy(language)
+        self._stemmer = None
+        self._stem_or_lem = 'lemmatization'
+        self._emotionlist = None
+        self._emojis_dict = _load_emojis(language)
+        self._idiomatic_tokens = _load_idiomatic_tokens(language)
         
         # Formamentis imports
-        self.antonyms = _load_antonyms(language)        
+        self._antonyms = _load_antonyms(language)        
         
         # Z-scores imports
-        self.baseline = _make_baseline(language = self.language, emotion_lexicon = self.emotion_lexicon)
-        self.lookup = _load_lookup_table(language = self.language)
+        self._baseline = _make_baseline(language = self.language, emotion_lexicon = self._emotion_lexicon)
+        self._lookup = _load_lookup_table(language = self.language)
         
         if emotion_model == 'plutchik':
             self.emotionslist = ['anger', 'trust', 'surprise', 'disgust', 'joy', 'sadness', 'fear', 'anticipation']
-            self.emotion_model = 'plutchik'
+            self._emotion_model = 'plutchik'
         
         
-    def set_stemming_lemming(self, stem_or_lem = 'lemmatization'):
+    def set_stemming_lemmatization(self, stem_or_lem = 'lemmatization'):
         
-        self.emotion_lexicon = _load_dictionary(self.language, stem_or_lem)
-        self.idiomatic_tokens = _load_idiomatic_tokens(self.language, stem_or_lem)
+        self._emotion_lexicon = _load_dictionary(self.language, stem_or_lem)
+        self._idiomatic_tokens = _load_idiomatic_tokens(self.language, stem_or_lem)
+        self._stem_or_lem = stem_or_lem
         
-        if stem_or_lem == 'lemmatization':
-            self.tagger = _load_spacy(self.language)  
-        elif stem_or_lem == 'stemming':
-            self.tagger = _load_stemmer(self.language)
+        if stem_or_lem == 'stemming' and self._stemmer is None:
+            self._stemmer = _load_stemmer(self.language)
          
+        
         
     def set_baseline(self, baseline = None):
         """
@@ -64,9 +66,9 @@ class EmoScores:
             If baseline is None, it will be computed the emotion distribution of the default emotion lexicon loaded.
             
         """
-        self.baseline = bsl._make_baseline(baseline, emotion_lexicon = self.emotion_lexicon, tagger = self.tagger,
-                                          emojis_dict = self.emojis_dict, idiomatic_tokens = self.idiomatic_tokens)
-        self.lookup = {}
+        self._baseline = bsl._make_baseline(baseline, emotion_lexicon = self._emotion_lexicon, tagger = self._tagger,
+                                          emojis_dict = self._emojis_dict, idiomatic_tokens = self._idiomatic_tokens)
+        self._lookup = {}
         
     
         
@@ -105,17 +107,18 @@ class EmoScores:
             A dict. Keys are emotions, and values the scores.            
         """
         
+        model = self._tagger if self._stem_or_lem == 'lemmatization' else self._stemmer
         
         return es._get_emotions(obj = obj, 
                        normalization_strategy = normalization_strategy, 
-                       emotion_lexicon = self.emotion_lexicon, 
+                       emotion_lexicon = self._emotion_lexicon, 
                        language = self.language,
-                       tagger = self.tagger,
+                       tagger = model,
                        emotions = self.emotionslist,
                        return_words = return_words,
-                       emojis_dict = self.emojis_dict,
+                       emojis_dict = self._emojis_dict,
                        convert_emojis = convert_emojis,
-                       idiomatic_tokens = self.idiomatic_tokens)
+                       idiomatic_tokens = self._idiomatic_tokens)
         
     
    
@@ -157,27 +160,29 @@ class EmoScores:
             
         """
         
+        model = self._tagger if self._stem_or_lem == 'lemmatization' else self._stemmer
+        
         
         if not baseline:
-            if not self.baseline:
-                self.baseline = bsl._make_baseline(baseline = None, tagger = self.tagger, language = self.language, emotion_lexicon = self.emotion_lexicon)
-            baseline = self.baseline
+            if not self._baseline:
+                self._baseline = bsl._make_baseline(baseline = None, tagger = model, language = self.language, emotion_lexicon = self._emotion_lexicon)
+            baseline = self._baseline
         else:
-            baseline = bsl._make_baseline(baseline = baseline, tagger = self.tagger, language = self.language, emotion_lexicon = self.emotion_lexicon)
+            baseline = bsl._make_baseline(baseline = baseline, tagger = model, language = self.language, emotion_lexicon = self._emotion_lexicon)
             
         
         
         return es._zscores(obj, 
                            baseline = baseline,
                            n_samples = n_samples,
-                           emotion_lexicon = self.emotion_lexicon,
+                           emotion_lexicon = self._emotion_lexicon,
                            language = self.language,
-                           tagger = self.tagger,
+                           tagger = model,
                            emotions = self.emotionslist,
-                           lookup = self.lookup,
-                           emojis_dict = self.emojis_dict,
+                           lookup = self._lookup,
+                           emojis_dict = self._emojis_dict,
                            convert_emojis = convert_emojis,
-                           idiomatic_tokens = self.idiomatic_tokens)
+                           idiomatic_tokens = self._idiomatic_tokens)
         
   
     def formamentis_network(self, 
@@ -224,21 +229,21 @@ class EmoScores:
             
         """
         
-        
-        
         return fme.get_formamentis_edgelist(text, 
                                      language = self.language, 
-                                     spacy_model = self.tagger,
+                                     spacy_model = self._tagger,
+                                     stemmer = self._stemmer,
+                                     stem_or_lem = self._stem_or_lem,
                                      target_word = target_word,
                                      keepwords = keepwords,
                                      stopwords = stopwords,
-                                     antonyms = self.antonyms,
+                                     antonyms = self._antonyms,
                                      max_distance = max_distance,
                                      with_type = with_type,
-                                     idiomatic_tokens = self.idiomatic_tokens
+                                     idiomatic_tokens = self._idiomatic_tokens
                                      )
         
-    
+        
     
     
     
@@ -343,18 +348,12 @@ class EmoScores:
             statistically over (under) represented (p-value = 0.05).
             
         """    
+        fmn = self.formamentis_network(text,
+                                       target_word = target_word,
+                                       keepwords = keepwords,
+                                       stopwords = stopwords,
+                                       max_distance = max_distance)
     
-        fmn = fme.get_formamentis_edgelist(text, 
-                                     language = self.language, 
-                                     spacy_model = self.tagger,
-                                     target_word = target_word,
-                                     keepwords = keepwords,
-                                     stopwords = stopwords,
-                                     antonyms = self.antonyms,
-                                     max_distance = max_distance,
-                                     with_type = False,
-                                     idiomatic_tokens = self.idiomatic_tokens
-                                     )
         zs = self.zscores(fmn)
         self.draw_plutchik(zs, reject_range = (-1.96, 1.96))
     

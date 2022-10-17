@@ -6,9 +6,7 @@
 import spacy
 import json
 from nltk.stem.snowball import SnowballStemmer
-import os
 
-PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 def _load_dictionary( language, stem_or_lem = 'lemmatization'):
     """
@@ -31,11 +29,11 @@ def _load_dictionary( language, stem_or_lem = 'lemmatization'):
     
     try:
         if stem_or_lem == 'lemmatization':
-            with open(os.path.join(PROJECT_ROOT, f"langs/{language}.json"), 'r') as fr:
+            with open(f"langs/{language}.json", 'r') as fr:
                 lang_df = json.load(fr)
         
         elif stem_or_lem == 'stemming':
-            with open(os.path.join(PROJECT_ROOT, f"langs/{language}_stem.json"), 'r') as fr:
+            with open(f"langs/{language}_stem.json", 'r') as fr:
                 lang_df = json.load(fr)
         
         return lang_df
@@ -65,11 +63,11 @@ def _load_idiomatic_tokens( language, stem_or_lem = 'lemmatization' ):
     """
     try:
         if stem_or_lem == 'lemmatization':
-            with open(os.path.join(PROJECT_ROOT, f"langs/{language}_idiomatic_tokens.json"), 'r') as fr:
+            with open(f"langs/{language}_idiomatic_tokens.json", 'r') as fr:
                 idiomatic_tokens = json.load(fr)
         
         elif stem_or_lem == 'stemming':
-            with open(os.path.join(PROJECT_ROOT, f"langs/{language}_stem_idiomatic_tokens.json"), 'r') as fr:
+            with open(f"langs/{language}_stem_idiomatic_tokens.json", 'r') as fr:
                 idiomatic_tokens = json.load(fr)
         
         return idiomatic_tokens
@@ -207,7 +205,7 @@ def _emotion_model_resources(emotion_lexicon = None, emotion_model = 'plutchik',
 def _load_emojis( language ):
     
     if language == 'english':
-        with open(os.path.join(PROJECT_ROOT, 'lexicons/emojis.json'), 'r') as fr:
+        with open('langs/emojis.json', 'r') as fr:
             return json.load(fr)
        
     return {}

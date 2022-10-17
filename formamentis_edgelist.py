@@ -35,14 +35,60 @@ def _wordnet_synonims(vertexlist, edgelist, language, with_type = False):
     
     if with_type:
         synonims_pairs = [(a, b, 'semantic') for a, b in synonims_pairs]
+        
+        
     edgelist += synonims_pairs
 
     return edgelist    
     
+# remove duplicates
+def f7(seq):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
 
-def _get_edges_vertex(text, spacy_model, language = 'english', keepwords = [], stopwords = [], antonyms = {}, wn = None, max_distance = 3, with_type = False):
+
+# Finds tokens to be negated
+def handle_negations(tokens):
+    negations = [token for token in tokens if token.dep_ == 'neg']
+    
+    tonegate = []
+    
+    for neg in negations:
+        head = neg.head
+        children = [x for x in head.children if 'comp' in x.dep_]
+        tonegate += [child.lemma_ for child in children]
+        
+        for child in children:
+            grandchildren = [gc for gc in child.children]
+            if not any([gc.text == 'but' for gc in grandchildren]):
+                grandchildren = [gc.lemma_ for gc in grandchildren if gc.dep_ == 'conj']
+                tonegate += grandchildren
+    
+    negations = [neg.lemma_ for neg in negations]
+    
+    return negations, tonegate
+
+
+# Replace negated words
+def replace_antonyms(lemma, negate_lemmas, antonyms):
+    
+    if lemma in negate_lemmas:
+        idx, lm = lemma.split('__')
+        if lm in antonyms:
+            lemma = idx + '__' + antonyms[lm]
+        else:
+            lemma = idx + '__' + 'not-' + lm
+    
+    return lemma
+
+    
+def _get_edges_vertex(text, spacy_model, stemmer = None, stem_or_lem = 'lemmatization', language = 'english', keepwords = [], stopwords = [], antonyms = {}, wn = None, max_distance = 3, with_type = False):
     """ Get an edgelist, with also stopwords in it, and a vertex list with no stopwords in it. """
     
+    
+    if stem_or_lem == 'stemming' and stemmer is None:
+        raise Exception("Value Error: Stemming was requested instead of lemmatization, but no stemmer was initialized. Please run set_stemming_lemmatization('stemming') before trying again.")
     
     edgelist = []
     vertexlist = []
@@ -61,84 +107,86 @@ def _get_edges_vertex(text, spacy_model, language = 'english', keepwords = [], s
 
     for sentence in sentences:
         
-        
         sent_edges = []
         sent_vertex = []
-        negations_lemmas = []
-        to_negate = []
-    
-        # tokenize sentence
-        tokens = [(index, token) for index, token in enumerate(nlp(sentence.text))]
-        for i, token in tokens:
-            token.lemma_ = '{}__'.format(i) + token.lemma_
-        tokens = [token for _, token in tokens]    
         
+        # tokenize sentence
+        tokens = [token for token in nlp(sentence.text)]
+        for i, token in enumerate(tokens):
+            token.lemma_ = '{}__'.format(i) + token.lemma_
+            
+            
+        # some tokens must be negated!
+        negations_lemmas, negate_lemmas = handle_negations(tokens)
+                
         for token in tokens:
-                        
-            #lemmatization
-            stem = token.lemma_
-            stem_head = token.head.lemma_
             
-            #is it a negation?
-            if token.text in _negations[language]:
-                negations_lemmas += [token.lemma_, token.text]
-                
-            # a pair < word, parent_word > unless word is ROOT
+            #is it a negation? skip it
+            if token.lemma_ in negations_lemmas:
+                continue
+            
+            # a pair <word, parent_word> unless word is ROOT
             if token.dep_ != 'ROOT':
-                sent_edges += [(stem, stem_head)]
+                sent_edges += [(token.head.lemma_, token.lemma_)]
             
-            # add edges with negated words (negation is parent)
-            if token.head.text in negations_lemmas:
-                num, ss = stem.split('__')
-                
-                if ss in antonyms.keys():
-                    sent_edges += [(num + '__' + antonyms[ss], stem)]
-                    to_negate += [stem]
-                    
-            # add edges with negated words (negation is children)
-            if token.text in negations_lemmas:
-                num, ss = stem_head.split('__')
-                
-                if ss in antonyms.keys():
-                    sent_edges += [(num + '__' + antonyms[ss], stem_head)]
-                    to_negate += [stem_head]
-                
             # should you keep the word? Yes if it is in keeppos or it is a negation or a pronoun
             keep = (token.pos_ in keeppos)
             # reasons to overtake on keep
             nokeep = (token.text in stopwords) or (token.is_stop) or len(token.text) <= 2 or bool(re.search('[0-9]', token.text))
             # reasons to overtake on everything
-            yakeep = (token.text in keepwords) or (token.text in _negations[language]) or (token.text in _pronouns[language])  
+            yakeep = (token.text in keepwords) or  (token.text in _pronouns[language])  
+            # old implementation            
+            # yakeep = (token.text in keepwords) or (token.text in _negations[language]) or (token.text in _pronouns[language])  
             
             if (keep and not nokeep) or yakeep:
-                sent_vertex += [stem]
+                sent_vertex += [token.lemma_]
                 
-                # add negated words to vertex
-                if stem in to_negate:
-                    num, ss = stem.split('__')
-                    if ss in antonyms.keys():
-                        sent_vertex += [num + '__' + antonyms[ss]]
-                                                
-                        
+        # all the lemmas we kept from the sentence
         sent_vertex = list(set(sent_vertex)) # there are NO stopwords in the vertex list.
-        sent_edges = list(set(sent_edges)) # there are stopwords in the edgelist!
         
-        #print([edge for edge in sent_edges if any([nl in edge for nl in negations_lemmas])])
+        # all possible pairs of edges between syntactically dependent words - no matter if we kept them!
+        sent_edges = f7(sent_edges) # there are stopwords in the edgelist!
         
-        sent_edges, sent_vertex = _get_network(sent_edges, sent_vertex, max_distance, with_type)        
+        # only edges between words at distance < threshold
+        sent_edges, sent_vertex = _get_network(sent_edges, sent_vertex, max_distance, with_type)     
+        
+        # Replace antonyms
+        if negate_lemmas:
+            sent_vertex = [replace_antonyms(word, negate_lemmas, antonyms) for word in sent_vertex]
+            sent_edges = [(replace_antonyms(a, negate_lemmas, antonyms), replace_antonyms(b, negate_lemmas, antonyms)) for a,b in sent_edges]
+        
+        
+        # stemming?
+        if stem_or_lem == 'stemming':
+            sent_vertex = [stemmer.stem(word) for word in sent_vertex]
+            sent_edges = [(stemmer.stem(a), stemmer.stem(b)) for a, b in sent_edges]
+            
+        # add this sentence's words and edges to global
         edgelist += sent_edges
         vertexlist += sent_vertex
 
-    
+
+    # remove indexes and add type
     if with_type:
         edgelist = [(a.split('__')[1], b.split('__')[1], c) for a, b, c in edgelist]
     else:
         edgelist = [(a.split('__')[1], b.split('__')[1]) for a, b in edgelist]
-
-    vertexlist = list(set([vertex.split('__')[1] for vertex in vertexlist]))
-    edgelist = _wordnet_synonims(vertexlist, edgelist, language, with_type)
-    edgelist = list(set(edgelist))
+        
+        
+    # list of tuples (a, b), where a < b, no self loops
+    if with_type:
+        edgelist = [(a, b, c) for a, b, c in edgelist if a != b]
+    else:
+        edgelist = [(a, b) for a, b in edgelist if a != b]
     
+    # remove indexes
+    vertexlist = list(set([vertex.split('__')[1] for vertex in vertexlist]))
+    
+    # add synonims
+    edgelist = _wordnet_synonims(vertexlist, edgelist, language, with_type)
+    
+    # unique edges
+    edgelist = f7(edgelist)
     
     
     return edgelist, vertexlist
@@ -176,6 +224,7 @@ def _get_network(edges, vertex, max_distance = 3, with_type = False):
     else:
         edges = [(a, b) for a, b in edges if a < b]
         
+    
     return edges, vertex
     
 
@@ -183,6 +232,8 @@ def _get_network(edges, vertex, max_distance = 3, with_type = False):
 def get_formamentis_edgelist(text, 
                              language = 'english', 
                              spacy_model = 'en_core_web_sm',
+                             stemmer = None,
+                             stem_or_lem = 'lemmatization',
                              target_word = None,
                              keepwords = [],
                              stopwords = [],
@@ -239,16 +290,14 @@ def get_formamentis_edgelist(text,
     
     text = _clean_text(text)
         
-    edges, vertex = _get_edges_vertex(text = text, spacy_model = spacy_model, language = language, 
+    edges, vertex = _get_edges_vertex(text = text, spacy_model = spacy_model, 
+                                      stemmer = stemmer, stem_or_lem = stem_or_lem, 
+                                      language = language, 
                                       keepwords = keepwords, stopwords = stopwords, 
                                       antonyms = antonyms,
                                       max_distance = max_distance, 
                                       with_type = with_type)
     
-    # TODO: synonims from WordNet
-    print("BEFORE:", edges)
-    edges = _wordnet_synonims(vertex, edges, language, with_type)
-    print("AFTER:", edges)
     
     # target words!
     if target_word:
