@@ -148,7 +148,7 @@ def _get_edges_vertex(text, spacy_model, stemmer = None, stem_or_lem = 'lemmatiz
         sent_edges = f7(sent_edges) # there are stopwords in the edgelist!
         
         # only edges between words at distance < threshold
-        sent_edges, sent_vertex = _get_network(sent_edges, sent_vertex, max_distance, with_type)     
+        sent_edges, sent_vertex = _get_network(sent_edges, sent_vertex, max_distance)     
         
         # Replace antonyms
         if negate_lemmas:
@@ -160,7 +160,11 @@ def _get_edges_vertex(text, spacy_model, stemmer = None, stem_or_lem = 'lemmatiz
         if stem_or_lem == 'stemming':
             sent_vertex = [stemmer.stem(word) for word in sent_vertex]
             sent_edges = [(stemmer.stem(a), stemmer.stem(b)) for a, b in sent_edges]
-            
+        
+        # with type?
+        if with_type:
+            sent_edges = [(a, b, 'syntactic') for a, b in sent_edges]
+        
         # add this sentence's words and edges to global
         edgelist += sent_edges
         vertexlist += sent_vertex
@@ -193,7 +197,7 @@ def _get_edges_vertex(text, spacy_model, stemmer = None, stem_or_lem = 'lemmatiz
 
 
     
-def _get_network(edges, vertex, max_distance = 3, with_type = False):
+def _get_network(edges, vertex, max_distance = 3):
     """ Builds a graph from the edgelist, keeps only pairs of vertex that:
         - are at maximum distance of `max_distance` links
         - are both in the vertex list
@@ -210,19 +214,13 @@ def _get_network(edges, vertex, max_distance = 3, with_type = False):
     # 1. source != target
     # 2. source in vertex, target in vertex
     # 3. distance <= max_distance
-    if with_type:
-        edges = [[(source, target, 'syntactic') for target, distance in path.items() if (1 <= distance <= max_distance) and (target in vertex)] for source, path in dict(spl).items() if source in vertex]
-    else:
-        edges = [[(source, target) for target, distance in path.items() if (1 <= distance <= max_distance) and (target in vertex)] for source, path in dict(spl).items() if source in vertex]
+    edges = [[(source, target) for target, distance in path.items() if (1 <= distance <= max_distance) and (target in vertex)] for source, path in dict(spl).items() if source in vertex]
     
     # unlist
     edges = list(itertools.chain(*edges))
     
     # list of lists of tuples (a, b), where a < b, no duplicates
-    if with_type:
-        edges = [(a, b, c) for a, b, c in edges if a < b]
-    else:
-        edges = [(a, b) for a, b in edges if a < b]
+    edges = [(a, b) for a, b in edges if a < b]
         
     
     return edges, vertex
@@ -305,10 +303,11 @@ def get_formamentis_edgelist(text,
         
         if with_type:
             edges = [(a, b, c) for a, b, c in edges if a in neighbors and b in neighbors]
+            vertex = list(set.union(set([a for a, _, _ in edges]), set([b for _, b, _ in edges])))
         else:
             edges = [(a, b) for a, b in edges if a in neighbors and b in neighbors]
+            vertex = list(set.union(set([a for a, _ in edges]), set([b for _, b in edges])))
             
-        vertex = list(set.union(set([a for a, _ in edges]), set([b for _, b in edges])))
     
     
     FormamentisNetwork = namedtuple('FormamentisNetwork', 'edges vertices')
