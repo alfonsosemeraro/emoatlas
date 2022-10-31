@@ -8,7 +8,7 @@ Created on Sat Aug 21 18:00:50 2021
 
 import networkx as nx
 import itertools
-from textloader import _clean_text
+from textloader import _clean_text, multiple_replace
 from language_dependencies import _negations, _pronouns, _language_code3, _valences
 import re
 import matplotlib.pyplot as plt
@@ -16,7 +16,7 @@ from nltk.corpus import wordnet as wn
 from collections import namedtuple
 
 
-def _wordnet_synonims(vertexlist, edgelist, language, with_type = False):
+def _wordnet_synonyms(vertexlist, language, with_type = False):
     """
     1. For each word `i` in vertexlist, get all synonims `S_i`
     2. For each pair of word in vertexlist that are synonims, draw an edge
@@ -24,7 +24,7 @@ def _wordnet_synonims(vertexlist, edgelist, language, with_type = False):
     """
     lang = _language_code3(language)
     if not lang:
-        return edgelist
+        return []
     
 #    L = len(edgelist)
     synonims_list = [list(set(itertools.chain(*[w.lemma_names(lang) for w in wn.synsets(x, lang = lang)]))) for x in vertexlist]
@@ -34,12 +34,38 @@ def _wordnet_synonims(vertexlist, edgelist, language, with_type = False):
     synonims_pairs = list(set(itertools.chain(*synonims_pairs)))
     
     if with_type:
-        synonims_pairs = [(a, b, 'semantic') for a, b in synonims_pairs]
+        synonims_pairs = [(a, b, 'synonyms') for a, b in synonims_pairs]
         
         
-    edgelist += synonims_pairs
+    synonims_pairs
 
-    return edgelist    
+    return synonims_pairs       
+
+
+def _wordnet_hypernyms(vertexlist, language, with_type = False):
+    """
+    1. For each word `i` in vertexlist, get all hypernyms `S_i`
+    2. For each pair of word in vertexlist that are hypernyms and synonyms, draw an edge
+       like (i, j \in S_i)
+    """
+    lang = _language_code3(language)
+    if not lang:
+        return []
+    
+    hypernyms_pairs = []
+    
+    for vertex in vertexlist:
+        hyp_list = [a for a in itertools.chain(*[[hyp.lemma_names(lang) for hyp in ss.hypernyms()] for ss in wn.synsets(vertex, lang = lang)])]
+        hyp_pairs = [(vertex, hyp) for hyp in itertools.chain(*hyp_list)]
+        hyp_pairs = [(a, b) for a, b in hyp_pairs if a != b and a in vertexlist and b in vertexlist]
+        
+        hypernyms_pairs.extend(hyp_pairs)
+        
+    if with_type:
+        hypernyms_pairs = [(a, b, 'hypernyms') for a, b in hypernyms_pairs]
+        
+    return hypernyms_pairs   
+
     
 # remove duplicates
 def f7(seq):
@@ -83,7 +109,7 @@ def replace_antonyms(lemma, negate_lemmas, antonyms):
     return lemma
 
     
-def _get_edges_vertex(text, spacy_model, stemmer = None, stem_or_lem = 'lemmatization', language = 'english', keepwords = [], stopwords = [], antonyms = {}, wn = None, max_distance = 3, with_type = False):
+def _get_edges_vertex(text, spacy_model, stemmer = None, stem_or_lem = 'lemmatization', language = 'english', keepwords = [], stopwords = [], antonyms = {}, wn = None, max_distance = 3, semantic_enrichment = '', with_type = False):
     """ Get an edgelist, with also stopwords in it, and a vertex list with no stopwords in it. """
     
     
@@ -187,7 +213,14 @@ def _get_edges_vertex(text, spacy_model, stemmer = None, stem_or_lem = 'lemmatiz
     vertexlist = list(set([vertex.split('__')[1] for vertex in vertexlist]))
     
     # add synonims
-    edgelist = _wordnet_synonims(vertexlist, edgelist, language, with_type)
+    if semantic_enrichment == 'synonyms' or 'synonyms' in semantic_enrichment:
+        syn_edges = _wordnet_synonyms(vertexlist, language, with_type)
+        edgelist.extend(syn_edges)
+        
+    # add hypernyms
+    if semantic_enrichment == 'hypernyms' or 'hypernyms' in semantic_enrichment:
+        hyp_edges = _wordnet_hypernyms(vertexlist, language, with_type)
+        edgelist.extend(hyp_edges)
     
     # unique edges
     edgelist = f7(edgelist)
@@ -237,7 +270,8 @@ def get_formamentis_edgelist(text,
                              stopwords = [],
                              antonyms = None,
                              max_distance = 3,
-                             with_type = False,
+                             semantic_enrichment = 'synonyms',
+                             multiplex = False,
                              idiomatic_tokens = None
                              ):
     """
@@ -271,29 +305,50 @@ def get_formamentis_edgelist(text,
         An integer, by default 2. Links in the formamentis network will be established from each word to each neighbor within a distance
         defined by max_distance.
         
-    *with_type*:
-        A boolean. If True, each edge will come with an attribute that tells if the edge is syntactic or semantic. 
-        Default is False
+     *semantic_enrichment*:
+        A str or a list of str. If 'synonyms', will be added semantic arcs between synonyms into the network. If 'hypernyms', will be
+        added semantic arcs between hypernyms and hyponyms. Also ['synonyms', 'hypernyms'] is accepted.
+        
+    *multiplex*:
+        A bool: whether to return different edgelist for different kinds of edges (syntactic, synonyms, hypernyms) or not. Default is False.
+           
         
     Returns:
     ----------
     *edges*:
-        A list of 2-items tuples, defining the edgelist of the formamentis network.
+        A list of 2-items tuples, defining the edgelist of the formamentis network. If multiplex is True,
+        it returns a dictionary with syntactic and semantic edges separately.
     
     *vertex*:
         A list of string, defining the list of vertices of the network.
         
     """
     
+    # semantic_enrichment must be either a string in ['synonyms', 'hypernyms']
+    accepted_values = ['synonyms', 'hypernyms', '']
+    
+    if type(semantic_enrichment) == str and semantic_enrichment not in accepted_values:
+        wrong = [val for val in semantic_enrichment if val not in accepted_values][0]
+        raise Exception(f"Value Error: wrong value '{wrong}' for semantic enrichment: it must be either 'synonyms', 'hypernyms' or empty, or any combination of the above.")
+    elif semantic_enrichment is None:
+        semantic_enrichment = ''
+    elif type(semantic_enrichment) == list and any([val not in accepted_values for val in semantic_enrichment]):
+        wrong = [val for val in semantic_enrichment if val not in accepted_values][0]
+        raise Exception(f"Value Error: wrong value '{wrong}' for semantic enrichment: it must be either 'synonyms', 'hypernyms' or empty, or any combination of the above.")
+    
     
     text = _clean_text(text)
+    
+    with_type = multiplex
+        
         
     edges, vertex = _get_edges_vertex(text = text, spacy_model = spacy_model, 
                                       stemmer = stemmer, stem_or_lem = stem_or_lem, 
                                       language = language, 
                                       keepwords = keepwords, stopwords = stopwords, 
                                       antonyms = antonyms,
-                                      max_distance = max_distance, 
+                                      max_distance = max_distance,
+                                      semantic_enrichment = semantic_enrichment,
                                       with_type = with_type)
     
     
@@ -308,8 +363,17 @@ def get_formamentis_edgelist(text,
             edges = [(a, b) for a, b in edges if a in neighbors and b in neighbors]
             vertex = list(set.union(set([a for a, _ in edges]), set([b for _, b in edges])))
             
-    
-    
+    # should we return a dictionary?
+    if multiplex:
+        edgelist = {}
+        edgelist['syntactyc'] = [(a, b) for a, b, c in edges if c == 'syntactic']
+        if 'synonyms' == semantic_enrichment or 'synonyms' in semantic_enrichment:
+            edgelist['synonyms'] = [(a, b) for a, b, c in edges if c == 'synonyms']
+        if 'hypernyms' == semantic_enrichment or 'hypernyms' in semantic_enrichment:
+            edgelist['hypernyms'] = [(a, b) for a, b, c in edges if c == 'hypernyms']
+        edges = edgelist
+        
+        
     FormamentisNetwork = namedtuple('FormamentisNetwork', 'edges vertices')
     return FormamentisNetwork(edges, vertex)
 

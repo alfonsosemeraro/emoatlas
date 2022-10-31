@@ -191,6 +191,8 @@ class EmoScores:
                             keepwords = [],
                             stopwords = [],
                             max_distance = 3,
+                            semantic_enrichment = 'synonyms',
+                            multiplex = False,
                             with_type = False
                          ):
         """
@@ -217,10 +219,14 @@ class EmoScores:
         *max_distance*:
             An integer, by default 2. Links in the formamentis network will be established from each word to each neighbor within a distance
             defined by max_distance.
+        
+        *semantic_enrichment*:
+            A str or a list of str. If 'synonyms', will be added semantic arcs between synonyms into the network. If 'hyperonyms', will be
+            added semantic arcs between hyperonyms and hyponyms. Also ['synonyms', 'hyperonyms'] is accepted.
             
-        *with_type*:
-            A boolean. If True, each edge will come with an attribute that tells if the edge is syntactic or semantic. 
-            Default is False
+        *multiplex*:
+            A bool: whether to return different edgelist for different kinds of edges (syntactic, synonyms, hyperonyms) or not. Default is False.
+           
             
         Returns:
         ----------
@@ -239,7 +245,8 @@ class EmoScores:
                                      stopwords = stopwords,
                                      antonyms = self._antonyms,
                                      max_distance = max_distance,
-                                     with_type = with_type,
+                                     semantic_enrichment = semantic_enrichment,
+                                     multiplex = multiplex,
                                      idiomatic_tokens = self._idiomatic_tokens
                                      )
         
@@ -311,7 +318,8 @@ class EmoScores:
                                 target_word = None,
                                 keepwords = [],
                                 stopwords = [],
-                                max_distance = 3, 
+                                max_distance = 3,
+                                semantic_enrichment = [], 
                                 reject_range = (-1.96, 1.96)):
         
         """
@@ -342,6 +350,11 @@ class EmoScores:
         *max_distance*:
             An integer, by default 2. Links in the formamentis network will be established from each word to each neighbor within a distance
             defined by max_distance.
+        
+        *semantic_enrichment*:
+            A str or a list of str. If 'synonyms', will be added semantic arcs between synonyms into the network. If 'hyperonyms', will be
+            added semantic arcs between hyperonyms and hyponyms. Also ['synonyms', 'hyperonyms'] is accepted.
+            
             
         *reject_range*:
             A threshold for significance of zscores. A zscore higher (lower) than 1.96 (-1.96) means that an emotion is 
@@ -352,8 +365,10 @@ class EmoScores:
                                        target_word = target_word,
                                        keepwords = keepwords,
                                        stopwords = stopwords,
+                                       semantic_enrichment = semantic_enrichment,
+                                       multiplex = True,
                                        max_distance = max_distance)
-    
+        
         zs = self.zscores(fmn)
         self.draw_plutchik(zs, reject_range = (-1.96, 1.96))
     
