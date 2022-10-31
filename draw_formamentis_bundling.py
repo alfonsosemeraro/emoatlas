@@ -7,7 +7,7 @@ import community.community_louvain as commlouv
 from resources import _valences
 import matplotlib.pyplot as plt
 from math import cos, sin, radians
-
+from decimal import Decimal as D
 
 def _rotate_point(point, angle):
     """
@@ -84,24 +84,24 @@ def _draw_edge(s, t, pos, louv):
     return alpha, patch
 
 
-def _edge_params(w1, w2, _positive, _negative, _ambivalent, colz):
+def _edge_params(w1, w2, _positive, _negative, _ambivalent, base_linewidth, colz):
         
     if w1 in _positive and w2 in _positive:
-        return colz['positive'], 3, 1
+        return colz['positive'], 3*base_linewidth, 1
     if w1 in _negative and w2 in _negative:
-        return colz['negative'], 3, 1
+        return colz['negative'], 3*base_linewidth, 1
     
     if w1 in _negative and w2 in _positive:
-        return 'purple', 3, 1
+        return 'purple', 3*base_linewidth, 1
     if w1 in _positive and w2 in _negative:
-        return 'purple', 3, 1
+        return 'purple', 3*base_linewidth, 1
     
     if w1 in _positive or w2 in _positive:
-        return colz['semipositive'], 1, -1
+        return colz['semipositive'], 2*base_linewidth, -1
     if w1 in _negative or w2 in _negative:
-        return colz['seminegative'], 1, -1
+        return colz['seminegative'], 2*base_linewidth, -1
     
-    return 'lightgrey', 1, -1
+    return 'lightgrey', base_linewidth, -1
 
 
 def _hex_to_rgb(value):
@@ -112,7 +112,7 @@ def _hex_to_rgb(value):
     return lv
 
 
-def draw_formamentis_circle_layout(fmn, highlight = [], language = 'english', ax = None):
+def draw_formamentis_circle_layout(fmn, highlight = [], language = 'english', thickness = 15, ax = None):
     """
     
     """
@@ -120,7 +120,8 @@ def draw_formamentis_circle_layout(fmn, highlight = [], language = 'english', ax
     # Define color-blind palette
     colz = {'positive': (26/256, 133/256, 255/256),
             'negative': (255/256, 25/256, 25/256), #(212/256, 17/256, 89/256),
-            'semantic': (34/256, 139/256, 34/256),
+            'synonyms': (34/256, 139/256, 34/256),
+            'hypernyms': (12/256, 76/256, 12/256),
             'semipositive': (117/256, 152/256, 191/256),
             'seminegative': (200/256, 50/256, 50/256)} #(196/256, 128/256, 153/256)}
     
@@ -130,13 +131,30 @@ def draw_formamentis_circle_layout(fmn, highlight = [], language = 'english', ax
     if not ax:
         _, ax = plt.subplots(figsize=(16, 16)) 
     
-    
-    if len(fmn.edges[0]) > 2:
-        edge_type = [edge[2] for edge in fmn.edges]
-        edgelist = [(a, b) for a, b, c in fmn.edges]
+    # Getting edgelist stripped of type
+    if type(fmn.edges) == list:
+            edge_type = ['syntactic']*len(fmn.edges)
+            edgelist = fmn.edges
     else:
-        edge_type = ['syntactic']*len(fmn.edges)
-        edgelist = fmn.edges
+        edgelist = []
+        edge_type = []
+        
+        edgelist.extend(fmn.edges['syntactic'])
+        edge_type.extend(['syntactic']*len(fmn.edges['syntactic']))
+        
+        try:
+            edgelist.extend(fmn.edges['synonyms'])
+            edge_type.extend(['synonyms']*len(fmn.edges['synonyms']))
+        except:
+            pass
+        
+        try:
+            edgelist.extend(fmn.edges['hypernyms'])
+            edge_type.extend(['hypernyms']*len(fmn.edges['hypernyms']))
+        except:
+            pass
+        
+        
         
     ## Graph and clusters
     G = nx.Graph(edgelist)
@@ -173,7 +191,7 @@ def draw_formamentis_circle_layout(fmn, highlight = [], language = 'english', ax
         counter += 1
         
         # compute position and rotation of label
-        x, y = _rotate_point((0, 1), d*i)    
+        x, y = _rotate_point((0, 1), D(d)*D(i))    
         pos[v] = (x, y)
         rotation, align1, align2 = _label_rot_params(i, N, d)
     
@@ -206,18 +224,22 @@ def draw_formamentis_circle_layout(fmn, highlight = [], language = 'english', ax
     lws = []
     zors = []
     
+    
+    
     j = 0
     for s, t in edgelist:
         alpha, patch = _draw_edge(s, t, pos, louv)
         alphas.append(alpha)
         patches.append(patch)
         
-        color, linewidth, zorder = _edge_params(s, t, _positive, _negative, _ambivalent, colz)
+        color, linewidth, zorder = _edge_params(s, t, _positive, _negative, _ambivalent, thickness, colz)
         
         # Patch: if the edge is semantic we should color it as semantic
-        if edge_type[j] == 'semantic':
-            color = colz['semantic']
-        
+        if edge_type[j] == 'synonyms':
+            color = colz['synonyms']
+        if edge_type[j] == 'hypernyms':
+            color = colz['hypernyms']
+            
         colors.append(color)
         lws.append(linewidth)
         zors.append(zorder)

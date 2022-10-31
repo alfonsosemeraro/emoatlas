@@ -95,9 +95,15 @@ def _edge_color(w1, w2, _positive, _negative, _ambivalent, colz):
     if w1 in _positive and w2 in _negative:
         return 'purple'
     
+    if w1 in _positive or w2 in _positive:
+        return colz['semipositive']
+    if w1 in _negative or w2 in _negative:
+        return colz['seminegative']
+    
     return 'lightgrey'
 
-def draw_formamentis_force_layout(edgelist, highlight = [], language = 'english', ax = None):
+
+def draw_formamentis_force_layout(edgelist, highlight = [], language = 'english', thickness = 1, ax = None):
     """
     
     """
@@ -105,8 +111,11 @@ def draw_formamentis_force_layout(edgelist, highlight = [], language = 'english'
     
     # Define color-blind palette
     colz = {'positive': (26/256, 133/256, 255/256),
-            'negative': (212/256, 17/256, 89/256),
-            'semantic': (34/256, 139/256, 34/256)}
+            'negative': (255/256, 25/256, 25/256), #(212/256, 17/256, 89/256),
+            'synonyms': (34/256, 139/256, 34/256),
+            'hypernyms': (12/256, 76/256, 12/256),
+            'semipositive': (117/256, 152/256, 191/256),
+            'seminegative': (200/256, 50/256, 50/256)} #(196/256, 128/256, 153/256)}
     
     # Get positive or negative valences
     _positive, _negative, _ambivalent = _valences(language)
@@ -119,15 +128,30 @@ def draw_formamentis_force_layout(edgelist, highlight = [], language = 'english'
         _, ax = plt.subplots(figsize=(9,9)) 
         
         
-    # Build the Graph
-    if len(edgelist[0]) > 2:
-        edge_type = [c for a, b, c in edgelist]
-        edgelist = [(a, b) for a, b, c in edgelist]
+    # Getting edgelist stripped of type
+    if type(edgelist) == list:
+            edge_type = ['syntactic']*len(edgelist)
+            edgelist = edgelist
     else:
-        edge_type = ['syntactic']*len(edgelist)
+        edges = []
+        edge_type = []
         
-    edgelist = [(a, b) for a, b in edgelist if a != b]    
-    
+        edges.extend(edgelist['syntactic'])
+        edge_type.extend(['syntactic']*len(edgelist['syntactic']))
+        
+        try:
+            edges.extend(edgelist['synonyms'])
+            edge_type.extend(['synonyms']*len(edgelist['synonyms']))
+        except:
+            pass
+        
+        try:
+            edges.extend(edgelist['hypernyms'])
+            edge_type.extend(['hypernyms']*len(edgelist['hypernyms']))
+        except:
+            pass
+        
+        edgelist = edges
     
     G = nx.Graph(edgelist)
      
@@ -162,8 +186,11 @@ def draw_formamentis_force_layout(edgelist, highlight = [], language = 'english'
     j = 0
     for x, y in edgelist:
         
-        if edge_type[j] == 'semantic':
-            color = colz['semantic']
+        if edge_type[j] == 'synonyms':
+            color = colz['synonyms']
+        elif edge_type[j] == 'hypernyms':
+            color = colz['hypernyms']
+            
         else:
             color = _edge_color(x, y, _positive, _negative, _ambivalent, colz)
         
@@ -176,12 +203,12 @@ def draw_formamentis_force_layout(edgelist, highlight = [], language = 'english'
     
         else:
             plt.plot([pos[x][0], pos[y][0]], [pos[x][1], pos[y][1]], color = color, 
-                     linewidth = 1, alpha = .1, zorder = -1)
+                     linewidth = thickness, alpha = .2, zorder = -1)
         
         j += 1
     
     
-    patches = PatchCollection(patches, facecolor = 'none', linewidth = 1, edgecolor = colors, 
+    patches = PatchCollection(patches, facecolor = 'none', linewidth = thickness, edgecolor = colors, 
                               match_original=True, alpha = .3, zorder = 0)
     ax.add_collection(patches)
     

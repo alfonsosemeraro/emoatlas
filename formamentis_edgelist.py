@@ -56,7 +56,7 @@ def _wordnet_hypernyms(vertexlist, language, with_type = False):
     
     for vertex in vertexlist:
         hyp_list = [a for a in itertools.chain(*[[hyp.lemma_names(lang) for hyp in ss.hypernyms()] for ss in wn.synsets(vertex, lang = lang)])]
-        hyp_pairs = [(vertex, hyp) for hyp in itertools.chain(*hyp_list)]
+        hyp_pairs = list(set([(vertex, hyp) for hyp in itertools.chain(*hyp_list)]))
         hyp_pairs = [(a, b) for a, b in hyp_pairs if a != b and a in vertexlist and b in vertexlist]
         
         hypernyms_pairs.extend(hyp_pairs)
@@ -202,15 +202,10 @@ def _get_edges_vertex(text, spacy_model, stemmer = None, stem_or_lem = 'lemmatiz
     else:
         edgelist = [(a.split('__')[1], b.split('__')[1]) for a, b in edgelist]
         
-        
-    # list of tuples (a, b), where a < b, no self loops
-    if with_type:
-        edgelist = [(a, b, c) for a, b, c in edgelist if a != b]
-    else:
-        edgelist = [(a, b) for a, b in edgelist if a != b]
     
     # remove indexes
     vertexlist = list(set([vertex.split('__')[1] for vertex in vertexlist]))
+    
     
     # add synonims
     if semantic_enrichment == 'synonyms' or 'synonyms' in semantic_enrichment:
@@ -222,7 +217,14 @@ def _get_edges_vertex(text, spacy_model, stemmer = None, stem_or_lem = 'lemmatiz
         hyp_edges = _wordnet_hypernyms(vertexlist, language, with_type)
         edgelist.extend(hyp_edges)
     
-    # unique edges
+    # unique edges and no self-loops
+    if with_type:
+        edgelist.extend([(b, a, c) for a, b, c in edgelist])
+        edgelist = [(a, b, c) for a, b, c in edgelist if a < b]
+    else:
+        edgelist.extend([(b, a) for a, b in edgelist])
+        edgelist = [(a, b) for a, b in edgelist if a < b]
+        
     edgelist = f7(edgelist)
     
     
@@ -366,7 +368,7 @@ def get_formamentis_edgelist(text,
     # should we return a dictionary?
     if multiplex:
         edgelist = {}
-        edgelist['syntactyc'] = [(a, b) for a, b, c in edges if c == 'syntactic']
+        edgelist['syntactic'] = [(a, b) for a, b, c in edges if c == 'syntactic']
         if 'synonyms' == semantic_enrichment or 'synonyms' in semantic_enrichment:
             edgelist['synonyms'] = [(a, b) for a, b, c in edges if c == 'synonyms']
         if 'hypernyms' == semantic_enrichment or 'hypernyms' in semantic_enrichment:

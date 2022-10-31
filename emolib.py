@@ -254,7 +254,7 @@ class EmoScores:
     
     
     
-    def draw_formamentis(self, fmn, layout = 'edge_bundling', highlight = [], ax = None):
+    def draw_formamentis(self, fmn, layout = 'edge_bundling', highlight = [], thickness = 1, ax = None):
         """
         Represents a Formamentis Network in either a circular or force-based layout.
             
@@ -269,6 +269,9 @@ class EmoScores:
             
         *highlight*:
             A list of the words to highlight in the network.
+            
+        *thickness*:
+            A numeric. How thick must lines be drawn. Default is 1.
         
         *ax*:
             A matplotlib axes to draw the network on. If none is provided, a new one will be created.
@@ -276,9 +279,9 @@ class EmoScores:
         """
         
         if layout == 'force_layout':
-            dff.draw_formamentis_force_layout(fmn.edges, highlight = highlight, language = self.language, ax = ax)
+            dff.draw_formamentis_force_layout(fmn.edges, highlight = highlight, language = self.language, thickness = thickness, ax = ax)
         elif layout == 'edge_bundling':
-            dfb.draw_formamentis_circle_layout(fmn, highlight = highlight, language = self.language, ax = ax)
+            dfb.draw_formamentis_circle_layout(fmn, highlight = highlight, language = self.language, thickness = thickness, ax = ax)
             
             
             
@@ -366,7 +369,6 @@ class EmoScores:
                                        keepwords = keepwords,
                                        stopwords = stopwords,
                                        semantic_enrichment = semantic_enrichment,
-                                       multiplex = True,
                                        max_distance = max_distance)
         
         zs = self.zscores(fmn)
