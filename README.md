@@ -1,4 +1,4 @@
-![EmoAtlas](ea.png =100x100)
+<img src="ea.png" data-canonical-src="ea.png" width="100" height="100" />
 
 A Python library for the detection and visualization of emotions in texts, coming soon with the first release ✨
 
