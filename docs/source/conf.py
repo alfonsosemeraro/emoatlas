@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.abspath('../..'))
 # -- Project information -----------------------------------------------------
 
 project = 'EmoAtlas'
-copyright = '2022, Tarantino Q.'
-author = 'Semeraro A., Vilella S., Johansonn S.'
+copyright = '2022, Semeraro et al.'
+author = 'Semeraro A., Vilella S., Mohammad S., Ruffo G., Stella M.'
 
 # The full version, including alpha/beta/rc tags
 release = '1.0'
