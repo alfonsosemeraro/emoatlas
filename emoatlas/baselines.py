@@ -20,6 +20,7 @@ def _make_baseline(
     emojis_dict={},
     idiomatic_tokens={},
     emotion_lexicon=None,
+    convert_emojis=True,
 ):
 
     if baseline:
