@@ -39,6 +39,7 @@ jobs:
         pip install .
         pip install -r requirements.txt
         python -m spacy download en_core_web_lg
+        python -m nltk.downloader wordnet
         python -m pip install flake8 pytest
         pip install pytest pytest-cov
         pip install coveralls
