@@ -31,11 +31,15 @@ def _load_dictionary(language, stem_or_lem="lemmatization"):
 
     try:
         if stem_or_lem == "lemmatization":
-            with open(f"{emoatlas.__path__[0]}{os.sep}langs{os.sep}{language}.json", "r") as fr:
+            with open(
+                f"{emoatlas.__path__[0]}{os.sep}langs{os.sep}{language}.json", "r"
+            ) as fr:
                 lang_df = json.load(fr)
 
         elif stem_or_lem == "stemming":
-            with open(f"{emoatlas.__path__[0]}{os.sep}langs{os.sep}{language}_stem.json", "r") as fr:
+            with open(
+                f"{emoatlas.__path__[0]}{os.sep}langs{os.sep}{language}_stem.json", "r"
+            ) as fr:
                 lang_df = json.load(fr)
 
         return lang_df
@@ -65,7 +69,8 @@ def _load_idiomatic_tokens(language, stem_or_lem="lemmatization"):
     try:
         if stem_or_lem == "lemmatization":
             with open(
-                f"{emoatlas.__path__[0]}{os.sep}langs{os.sep}{language}_idiomatic_tokens.json", "r"
+                f"{emoatlas.__path__[0]}{os.sep}langs{os.sep}{language}_idiomatic_tokens.json",
+                "r",
             ) as fr:
                 idiomatic_tokens = json.load(fr)
 
