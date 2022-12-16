@@ -9,3 +9,4 @@ community>=1.0.0b1
 python-louvain>=0.16
 numpy
 setuptools
+scipy
