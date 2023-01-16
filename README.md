@@ -28,3 +28,6 @@ the command above installs English, but a list of possible language codes can be
 ## Usage
 See the Jupyter notebooks in `demos/` for examples of how to use emoatlas ([Jupyter notebook](https://github.com/jupyter/notebook) required)
 
+
+## Acknowledgements
+Thanks to [@FinleyGibson](https://github.com/FinleyGibson) and [@GiulioRossetti](https://github.com/GiulioRossetti) for their contribution to the testing, debugging and refactoring this library.
