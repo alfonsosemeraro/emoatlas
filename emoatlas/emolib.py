@@ -26,7 +26,10 @@ class EmoScores:
         # Basic imports
         self.language = language
         self._emotion_lexicon = _load_dictionary(language)
-        self._tagger = _load_spacy(language)
+        if spacy_model is None:
+            self._tagger = _load_spacy(language)
+        else:
+            self._tagger =  _load_spacy(model = spacy_model)
         self._stemmer = None
         self._stem_or_lem = "lemmatization"
         self._emotionlist = None

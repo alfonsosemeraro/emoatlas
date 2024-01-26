@@ -87,7 +87,7 @@ def _load_idiomatic_tokens(language, stem_or_lem="lemmatization"):
         raise ValueError("Language not supported.")
 
 
-def _load_spacy(language="english"):
+def _load_spacy(language="english", model=None):
     """
     Returns a spacy model object depending on the input provided.
     If no spacy_model will be inputed, a spacy model will be loaded according with the language parameter.
@@ -106,20 +106,31 @@ def _load_spacy(language="english"):
     *spacy_model*:
         spacy model loaded
     """
+    if model is None:
+        try:
+            # Spacy model depends on language
+            spacy_model_lang = _spacy_model_by_language(language)
 
-    try:
-        # Spacy model depends on language
-        spacy_model_lang = _spacy_model_by_language(language)
+            return spacy.load(spacy_model_lang)
 
-        return spacy.load(spacy_model_lang)
-
-    except:
-        raise ValueError(
-            "spacy_model must be either a string or a loaded Spacy model. Can't find Spacy model '{}' on your system. Please install a model from https://spacy.io/models.".format(
-                spacy_model_lang
+        except:
+            raise ValueError(
+                "spacy_model must be either a string or a loaded Spacy model. Can't find Spacy model '{}' on your system. Please install a model from https://spacy.io/models.".format(
+                    spacy_model_lang
+                )
             )
-        )
+    else:
+        try:
+            # if a model is specified, loads it directly without inferring it from language
 
+            return spacy.load(model)
+
+        except:
+            raise ValueError(
+                "spacy_model must be either a string or a loaded Spacy model. Can't find Spacy model '{}' on your system. Please install a model from https://spacy.io/models.".format(
+                    model
+                )
+            )
 
 def _spacy_model_by_language(language):
 
