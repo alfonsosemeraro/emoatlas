@@ -245,11 +245,11 @@ class EmoScores:
             defined by max_distance.
 
         *semantic_enrichment*:
-            A str or a list of str. If 'synonyms', will be added semantic arcs between synonyms into the network. If 'hyperonyms', will be
-            added semantic arcs between hyperonyms and hyponyms. Also ['synonyms', 'hyperonyms'] is accepted.
+            A str or a list of str. If 'synonyms', will be added semantic arcs between synonyms into the network. If 'hypernyms', will be
+            added semantic arcs between hypernyms and hyponyms. Also ['synonyms', 'hypernyms'] is accepted.
 
         *multiplex*:
-            A bool: whether to return different edgelist for different kinds of edges (syntactic, synonyms, hyperonyms) or not. Default is False.
+            A bool: whether to return different edgelist for different kinds of edges (syntactic, synonyms, hypernyms) or not. Default is False.
 
 
         Returns:
