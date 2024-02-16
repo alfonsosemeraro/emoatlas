@@ -14,7 +14,7 @@ with open(path.join(here, "requirements.txt"), encoding="utf-8") as f:
 
 setup(
     name="emoatlas",
-    version="0.0.1",
+    version="0.0.8",
     description="A Python library for the detection and visualization of emotions in texts",
     long_description=long_description,
     license="",
