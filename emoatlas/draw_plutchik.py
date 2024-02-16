@@ -604,7 +604,7 @@ def draw_plutchik(
     scores,
     ax=None,
     rescale=None,
-    reject_range=[-1.96,1.96], #default threshold for z-scores
+    reject_range=None,
     highlight="all",
     show_intensity_levels="none",
     font=None,

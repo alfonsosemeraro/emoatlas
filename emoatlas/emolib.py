@@ -318,13 +318,13 @@ class EmoScores:
                 ax=ax,
             )
 
-    def draw_statistically_significant_emotions(self, obj, reject_range=(-1.96, 1.96)):
+    def draw_statistically_significant_emotions(self, obj):
         """
         Computes how statistically significantly higher or lower is each emotion in the input text or Formamentis Network.
         It draws the Plutchik's flower highlighting only emotions over/under represented w.r.t. a neutral baseline.
         This function is a wrapper of
             zs = zscores(obj)
-            draw_plucthik(zs, reject_range = (-1.96, 1.96))
+            draw_plucthik(zs, reject_range = [-1.96, 1.96])
 
         Required arguments:
         ----------
@@ -336,9 +336,8 @@ class EmoScores:
             A threshold for significance of zscores. A zscore higher (lower) than 1.96 (-1.96) means that an emotion is
             statistically over (under) represented (p-value = 0.05).
         """
-
         zs = self.zscores(obj)
-        self.draw_plutchik(zs, reject_range=(-1.96, 1.96))
+        self.draw_plutchik(zs, reject_range=[-1.96, 1.96])
 
     def draw_formamentis_flower(
         self,
