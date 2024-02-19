@@ -101,3 +101,16 @@ def _convert_emojis(text, emojis_dict):
     ]
     text = "".join(text)
     return text
+
+def lemmatize_text(text, language='english'):
+    tagger = _load_spacy(language)
+    idiomatictokens= _load_idiomatic_tokens(language)
+    emojis= _load_emojis(language)
+
+    lemmatized=_load_object(text, 
+                            language=language,
+                            tagger=tagger,
+                            idiomatic_tokens=idiomatictokens,
+                            convert_emojis=True,
+                            emojis_dict=emojis)
+    print(lemmatized)
