@@ -2,6 +2,7 @@ import matplotlib.patches as mpatches
 import matplotlib.path as mpath
 from matplotlib.collections import PatchCollection
 import networkx as nx
+from deep_translator import GoogleTranslator
 
 import community.community_louvain as commlouv
 from emoatlas.resources import _valences
@@ -9,6 +10,26 @@ import matplotlib.pyplot as plt
 from math import cos, sin, radians
 from decimal import Decimal as D
 
+language_codes = {
+    "catalan": "ca",
+    "chinese": "zh",
+    "danish": "da",
+    "dutch": "nl",
+    "english": "en",
+    "french": "fr",
+    "german": "de",
+    "greek": "el",
+    "italian": "it",
+    "japanese": "ja",
+    "lithuanian": "lt",
+    "macedonian": "mk",
+    "norwegian": "no",
+    "polish": "pl",
+    "portoguese": "pt",
+    "romanian": "ro",
+    "russian": "ru",
+    "spanish": "es",
+}
 
 def _rotate_point(point, angle):
     """
@@ -108,7 +129,7 @@ def _hex_to_rgb(value):
 
 
 def draw_formamentis_circle_layout(
-    fmn, highlight=[], language="english", thickness=15, ax=None
+    fmn, highlight=[], language="english", thickness=15, ax=None, translated=False
 ):
     """ """
 
@@ -206,33 +227,63 @@ def draw_formamentis_circle_layout(
         else:
             color = "#030303"
 
-        if v in highlight:
-            ax.text(
-                x,
-                y,
-                " {} ".format(v),
-                rotation=rotation,
-                weight="bold",
-                bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
-                rotation_mode="anchor",
-                ha=align1,
-                va=align2,
-                fontsize=fz,
-                color=color,
-            )
-        else:
-            ax.text(
-                x,
-                y,
-                " {} ".format(v),
-                rotation=rotation,
-                rotation_mode="anchor",
-                ha=align1,
-                va=align2,
-                fontsize=fz,
-                color=color,
-            )
+        if translated == False:
+            if v in highlight:
+                ax.text(
+                    x,
+                    y,
+                    " {} ".format(v),
+                    rotation=rotation,
+                    weight="bold",
+                    bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
+                    rotation_mode="anchor",
+                    ha=align1,
+                    va=align2,
+                    fontsize=fz,
+                    color=color,
+                )
+            else:
+                ax.text(
+                    x,
+                    y,
+                    " {} ".format(v),
+                    rotation=rotation,
+                    rotation_mode="anchor",
+                    ha=align1,
+                    va=align2,
+                    fontsize=fz,
+                    color=color,
+                )
 
+        elif translated == True:
+
+            if v in highlight:
+                ax.text(
+                    x,
+                    y,
+                    " {} ".format(GoogleTranslator(source=language_codes[language], target='en').translate(v).lower()),
+                    rotation=rotation,
+                    weight="bold",
+                    bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
+                    rotation_mode="anchor",
+                    ha=align1,
+                    va=align2,
+                    fontsize=fz,
+                    color=color,
+                )
+            else:
+                ax.text(
+                    x,
+                    y,
+                    " {} ".format(GoogleTranslator(source=language_codes[language], target='en').translate(v).lower()),
+                    rotation=rotation,
+                    rotation_mode="anchor",
+                    ha=align1,
+                    va=align2,
+                    fontsize=fz,
+                    color=color,
+                )
+    
     ## DRAW ARCHS
     patches = []
     alphas = []
