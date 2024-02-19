@@ -36,6 +36,8 @@ def _rotate_point(point, angle):
 
 
 def _label_rot_params(i, N, d):
+
+    align2 = "center"
     if 0 < i < N / 4:
         rotation = 270 + round(d * i) % 90
         align1 = "right"
@@ -53,7 +55,6 @@ def _label_rot_params(i, N, d):
         align1 = "left"
         align2 = "bottom"
 
-    align2 = "center"
     return rotation, align1, align2
 
 
