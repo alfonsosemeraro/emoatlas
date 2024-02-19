@@ -8,7 +8,28 @@ from emoatlas.resources import _valences
 import community.community_louvain as commlouv
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
+from deep_translator import GoogleTranslator
 
+language_codes = {
+    "catalan": "ca",
+    "chinese": "zh",
+    "danish": "da",
+    "dutch": "nl",
+    "english": "en",
+    "french": "fr",
+    "german": "de",
+    "greek": "el",
+    "italian": "it",
+    "japanese": "ja",
+    "lithuanian": "lt",
+    "macedonian": "mk",
+    "norwegian": "no",
+    "polish": "pl",
+    "portoguese": "pt",
+    "romanian": "ro",
+    "russian": "ru",
+    "spanish": "es",
+}
 
 def _rotate_point(point, angle):
     """
@@ -100,7 +121,7 @@ def _edge_color(w1, w2, _positive, _negative, _ambivalent, colz):
 
 
 def draw_formamentis_force_layout(
-    edgelist, highlight=[], language="english", thickness=1, ax=None
+    edgelist, highlight=[], language="english", thickness=1, ax=None, translated=False
 ):
     """ """
 
@@ -245,121 +266,248 @@ def draw_formamentis_force_layout(
         zorder = int(degs[key] * 6)
         weight = "regular"
 
-        if key in highlight:
-            fontsize = 18
-            zorder = maxorder + 1
-            weight = "heavy"
+    if translated==True:
+        for key, val in pos.items():
+            fontsize = minfont + 5 * (degs[key] ** 3)
+            zorder = int(degs[key] * 6)
+            weight = "regular"
 
-        if key in _positive:
-            # shadow!
-            plt.annotate(
-                key,
-                xy=(val[0] * 1.01, val[1] * 1.005),
-                zorder=maxorder,
-                fontsize=fontsize,
-                weight=weight,
-                color=(0.7, 0.7, 0.7),
-                bbox=dict(
-                    boxstyle="round",
-                    fc=(0.7, 0.7, 0.7),
-                    ec=(0.7, 0.7, 0.7),
-                    linewidth=4,
-                ),
-            )
+            if key in highlight:
+                fontsize = 18
+                zorder = maxorder + 1
+                weight = "heavy"
 
-            plt.annotate(
-                key,
-                xy=(val[0], val[1]),
-                zorder=maxorder,
-                fontsize=fontsize,
-                weight=weight,
-                color=colz["positive"],
-                bbox=dict(
-                    boxstyle="round",
-                    fc=(0.9, 0.9, 0.9),
-                    ec=(0.9, 0.9, 0.9),
-                    linewidth=4,
-                ),
-            )
+            if key in _positive:
+                # shadow!
+                plt.annotate(
+                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    xy=(val[0] * 1.01, val[1] * 1.005),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    color=(0.7, 0.7, 0.7),
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.7, 0.7, 0.7),
+                        ec=(0.7, 0.7, 0.7),
+                        linewidth=4,
+                    ),
+                )
 
-        elif key in _negative:
-            # shadow!
-            plt.annotate(
-                key,
-                xy=(val[0] * 1.01, val[1] * 1.005),
-                zorder=maxorder,
-                fontsize=fontsize,
-                weight=weight,
-                color=(0.7, 0.7, 0.7),
-                bbox=dict(
-                    boxstyle="round",
-                    fc=(0.7, 0.7, 0.7),
-                    ec=(0.7, 0.7, 0.7),
-                    linewidth=4,
-                ),
-            )
+                plt.annotate(
+                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    xy=(val[0], val[1]),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    color=colz["positive"],
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.9, 0.9, 0.9),
+                        ec=(0.9, 0.9, 0.9),
+                        linewidth=4,
+                    ),
+                )
 
-            plt.annotate(
-                key,
-                xy=(val[0], val[1]),
-                zorder=maxorder,
-                fontsize=fontsize,
-                weight=weight,
-                color=colz["negative"],
-                bbox=dict(
-                    boxstyle="round",
-                    fc=(0.9, 0.9, 0.9),
-                    ec=(0.9, 0.9, 0.9),
-                    linewidth=4,
-                ),
-            )
+            elif key in _negative:
+                # shadow!
+                plt.annotate(
+                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    xy=(val[0] * 1.01, val[1] * 1.005),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    color=(0.7, 0.7, 0.7),
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.7, 0.7, 0.7),
+                        ec=(0.7, 0.7, 0.7),
+                        linewidth=4,
+                    ),
+                )
 
-        elif key in _ambivalent:
-            # shadow!
-            plt.annotate(
-                key,
-                xy=(val[0] * 1.01, val[1] * 1.005),
-                zorder=maxorder,
-                fontsize=fontsize,
-                weight=weight,
-                color=(0.7, 0.7, 0.7),
-                bbox=dict(
-                    boxstyle="round",
-                    fc=(0.7, 0.7, 0.7),
-                    ec=(0.7, 0.7, 0.7),
-                    linewidth=4,
-                ),
-            )
+                plt.annotate(
+                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    xy=(val[0], val[1]),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    color=colz["negative"],
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.9, 0.9, 0.9),
+                        ec=(0.9, 0.9, 0.9),
+                        linewidth=4,
+                    ),
+                )
 
-            plt.annotate(
-                key,
-                xy=(val[0], val[1]),
-                zorder=maxorder,
-                fontsize=fontsize,
-                weight=weight,
-                bbox=dict(
-                    boxstyle="round",
-                    fc=(0.9, 0.9, 0.9),
-                    ec=(119 / 255, 221 / 255, 118 / 255, 0.7),
-                    path_effects=eff,
-                    linewidth=3,
-                ),
-            )
+            elif key in _ambivalent:
+                # shadow!
+                plt.annotate(
+                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    xy=(val[0] * 1.01, val[1] * 1.005),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    color=(0.7, 0.7, 0.7),
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.7, 0.7, 0.7),
+                        ec=(0.7, 0.7, 0.7),
+                        linewidth=4,
+                    ),
+                )
 
-        else:
-            plt.annotate(
-                key,
-                xy=(val[0], val[1]),
-                zorder=zorder,
-                fontsize=fontsize,
-                weight=weight,
-                bbox=dict(
-                    boxstyle="round",
-                    fc=(0.85, 0.85, 0.85),
-                    ec=(0.8, 0.8, 0.8),
-                    linewidth=1,
-                ),
-            )
+                plt.annotate(
+                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    xy=(val[0], val[1]),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.9, 0.9, 0.9),
+                        ec=(119 / 255, 221 / 255, 118 / 255, 0.7),
+                        path_effects=eff,
+                        linewidth=3,
+                    ),
+                )
+
+            else:
+                plt.annotate(
+                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    xy=(val[0], val[1]),
+                    zorder=zorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.85, 0.85, 0.85),
+                        ec=(0.8, 0.8, 0.8),
+                        linewidth=1,
+                    ),
+                )
+    else:   #translated=false
+        for key, val in pos.items():
+            fontsize = minfont + 5 * (degs[key] ** 3)
+            zorder = int(degs[key] * 6)
+            weight = "regular"
+
+            if key in highlight:
+                fontsize = 18
+                zorder = maxorder + 1
+                weight = "heavy"
+
+            if key in _positive:
+                # shadow!
+                plt.annotate(
+                    key,
+                    xy=(val[0] * 1.01, val[1] * 1.005),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    color=(0.7, 0.7, 0.7),
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.7, 0.7, 0.7),
+                        ec=(0.7, 0.7, 0.7),
+                        linewidth=4,
+                    ),
+                )
+
+                plt.annotate(
+                    key,
+                    xy=(val[0], val[1]),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    color=colz["positive"],
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.9, 0.9, 0.9),
+                        ec=(0.9, 0.9, 0.9),
+                        linewidth=4,
+                    ),
+                )
+
+            elif key in _negative:
+                # shadow!
+                plt.annotate(
+                    key,
+                    xy=(val[0] * 1.01, val[1] * 1.005),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    color=(0.7, 0.7, 0.7),
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.7, 0.7, 0.7),
+                        ec=(0.7, 0.7, 0.7),
+                        linewidth=4,
+                    ),
+                )
+
+                plt.annotate(
+                    key,
+                    xy=(val[0], val[1]),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    color=colz["negative"],
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.9, 0.9, 0.9),
+                        ec=(0.9, 0.9, 0.9),
+                        linewidth=4,
+                    ),
+                )
+
+            elif key in _ambivalent:
+                # shadow!
+                plt.annotate(
+                    key,
+                    xy=(val[0] * 1.01, val[1] * 1.005),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    color=(0.7, 0.7, 0.7),
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.7, 0.7, 0.7),
+                        ec=(0.7, 0.7, 0.7),
+                        linewidth=4,
+                    ),
+                )
+
+                plt.annotate(
+                    key,
+                    xy=(val[0], val[1]),
+                    zorder=maxorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.9, 0.9, 0.9),
+                        ec=(119 / 255, 221 / 255, 118 / 255, 0.7),
+                        path_effects=eff,
+                        linewidth=3,
+                    ),
+                )
+
+            else:
+                plt.annotate(
+                    key,
+                    xy=(val[0], val[1]),
+                    zorder=zorder,
+                    fontsize=fontsize,
+                    weight=weight,
+                    bbox=dict(
+                        boxstyle="round",
+                        fc=(0.85, 0.85, 0.85),
+                        ec=(0.8, 0.8, 0.8),
+                        linewidth=1,
+                    ),
+                )
 
     ax.axis("off")
 
