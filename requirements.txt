@@ -10,3 +10,4 @@ numpy
 setuptools
 scipy
 chardet
+deep_translator
