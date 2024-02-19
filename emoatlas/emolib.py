@@ -276,7 +276,7 @@ class EmoScores:
         )
 
     def draw_formamentis(
-        self, fmn, layout="edge_bundling", highlight=[], thickness=1, ax=None
+        self, fmn, layout="edge_bundling", highlight=[], thickness=1, ax=None, translated=False,
     ):
         """
         Represents a Formamentis Network in either a circular or force-based layout.
@@ -299,6 +299,8 @@ class EmoScores:
         *ax*:
             A matplotlib axes to draw the network on. If none is provided, a new one will be created.
 
+        *translated*:
+            A boolean value. True for english-translated nodes, False for original node labels. Default is False.
         """
 
         if layout == "force_layout":
@@ -308,6 +310,7 @@ class EmoScores:
                 language=self.language,
                 thickness=thickness,
                 ax=ax,
+                translated=translated
             )
         elif layout == "edge_bundling":
             dfb.draw_formamentis_circle_layout(
@@ -316,6 +319,7 @@ class EmoScores:
                 language=self.language,
                 thickness=thickness,
                 ax=ax,
+                translated=translated
             )
 
     def draw_statistically_significant_emotions(self, obj):
