@@ -67,6 +67,10 @@ def _label_rot_params(i, N, d):
         align2 = "top"
     elif i <= N * 0.75:
         rotation = 270 + round(d * i) % 90
+        #fixing bug horizontal
+        if (round(d * i) % 90) <= 0.0000001:
+            rotation = round(d * i) 
+            rotation += 90
         align1 = "left"
         align2 = "top"
     else:
