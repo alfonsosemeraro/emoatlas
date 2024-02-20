@@ -132,6 +132,7 @@ def _load_spacy(language="english", model=None):
                 )
             )
 
+
 def _spacy_model_by_language(language):
 
     if language == "catalan":

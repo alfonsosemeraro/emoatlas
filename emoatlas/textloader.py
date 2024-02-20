@@ -37,7 +37,6 @@ def _clean_text(text):
 
 
 def _load_text(text, language, tagger, idiomatic_tokens):
-
     """Loads a wordlist from a text."""
 
     # clean text
@@ -60,7 +59,6 @@ def _load_text(text, language, tagger, idiomatic_tokens):
 
 
 def _load_object(obj, tagger, language, emojis_dict, convert_emojis, idiomatic_tokens):
-
     """Checks the format of the input, then loads the wordlist in the right way."""
 
     # DEALING WITH STRINGS
@@ -94,9 +92,11 @@ def _load_object(obj, tagger, language, emojis_dict, convert_emojis, idiomatic_t
 
 def _convert_emojis(text, emojis_dict):
     text = [
-        " " + emojis_dict[f"U+{ord(s):X}"] + " "
-        if f"U+{ord(s):X}" in emojis_dict
-        else s
+        (
+            " " + emojis_dict[f"U+{ord(s):X}"] + " "
+            if f"U+{ord(s):X}" in emojis_dict
+            else s
+        )
         for s in text
     ]
     text = "".join(text)

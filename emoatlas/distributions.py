@@ -3,6 +3,7 @@ Created on Fri Sep  3 12:29:39 2021
 
 @author: alfonso
 """
+
 from emoatlas.resources import _load_dictionary
 import numpy as np
 import random
@@ -138,10 +139,7 @@ def _emotion_words(
     )
 
     emo_words = {
-        emo: worddf.loc[
-            worddf["emotion"] == emo,
-        ].head(10)
-        for emo in emotions
+        emo: worddf.loc[worddf["emotion"] == emo,].head(10) for emo in emotions
     }
 
     return emo_words
