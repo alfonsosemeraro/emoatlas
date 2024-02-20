@@ -17,7 +17,8 @@ repository available at https://www.github.com/alfonsosemeraro/pyplutchik
 
 import shapely.geometry as sg
 import matplotlib.pyplot as plt
-import descartes
+
+# import descartes
 from math import cos, sin, radians
 import numpy as np
 import emoatlas.emotions as _emo_pluthick_
@@ -36,6 +37,32 @@ __all__ = [
     "get_random_emotions",
     "get_random_dyads",
 ]
+
+# def PolygonPatch(polygon, **kwargs):
+#     """Constructs a matplotlib patch from a Polygon geometry
+
+#     The `kwargs` are those supported by the matplotlib.patches.PathPatch class
+#     constructor. Returns an instance of matplotlib.patches.PathPatch.
+
+#     Example (using Shapely Point and a matplotlib axes)::
+
+#         b = shapely.geometry.Point(0, 0).buffer(1.0)
+#         patch = _PolygonPatch(b, fc='blue', ec='blue', alpha=0.5)
+#         ax.add_patch(patch)
+
+#     Emoatlas originally relied on the descartes package by Sean Gillies
+#     (BSD license, https://pypi.org/project/descartes) for PolygonPatch, but
+#     this dependency was removed in favor of the below matplotlib code.
+#     """
+#     from matplotlib.patches import PathPatch
+#     from matplotlib.path import Path
+
+#     path = Path.make_compound_path(
+#         Path(np.asarray(polygon.exterior.coords)[:, :2]),
+#         *[Path(np.asarray(ring.coords)[:, :2]) for ring in polygon.interiors],
+#     )
+#     return PathPatch(path, **kwargs)
+#   This solution was mutuated from the GeoPandas library (https://geopandas.org/en/stable/).
 
 
 def _rotate_point(point, angle):
@@ -170,7 +197,7 @@ def _neutral_central_circle(ax, r=0.15):
     """
     c = sg.Point(0, 0).buffer(r)
     ax.add_patch(
-        descartes.PolygonPatch(
+        _emo_pluthick_.PolygonPatch(
             c, fc="white", ec=(0.5, 0.5, 0.5, 0.3), alpha=1, zorder=15
         )
     )
@@ -287,7 +314,6 @@ def _check_scores_list_kind(tags_list):
 
 
 def _draw_rejection_region(ax, reject_range, rescale, offset=0.15):
-
     """
     Draws the rejection range.
 
@@ -321,7 +347,7 @@ def _draw_rejection_region(ax, reject_range, rescale, offset=0.15):
 
     c = sg.Point(0, 0).buffer(mmax)
     ax.add_patch(
-        descartes.PolygonPatch(
+        _emo_pluthick_.PolygonPatch(
             c, fc="grey", ec=(0.5, 0.5, 0.5, 0.3), alpha=0.1, zorder=-2
         )
     )
@@ -334,7 +360,7 @@ def _draw_rejection_region(ax, reject_range, rescale, offset=0.15):
     if reject_range[0] > rescale[0]:
         c = sg.Point(0, 0).buffer(mmin)
         ax.add_patch(
-            descartes.PolygonPatch(c, fc="white", ec=(0.5, 0.5, 0.5, 0), zorder=-1)
+            _emo_pluthick_.PolygonPatch(c, fc="white", ec=(0.5, 0.5, 0.5, 0), zorder=-1)
         )
 
         c = plt.Circle(
@@ -346,7 +372,6 @@ def _draw_rejection_region(ax, reject_range, rescale, offset=0.15):
 
 
 def get_random_emotions(intensity_levels=False):
-
     """
     Gets a dict with emotions, ready to be drawed.
 

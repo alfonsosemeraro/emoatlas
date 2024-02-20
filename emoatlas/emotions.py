@@ -11,9 +11,39 @@ repository available at https://www.github.com/alfonsosemeraro/pyplutchik
 """
 
 import shapely.geometry as sg
-import descartes
+
+# import descartes
 from math import sqrt, cos, sin, radians
 from matplotlib import colors
+
+# from emoatlas.draw_plutchik import PolygonPatch
+
+
+def PolygonPatch(polygon, **kwargs):
+    """Constructs a matplotlib patch from a Polygon geometry
+
+    The `kwargs` are those supported by the matplotlib.patches.PathPatch class
+    constructor. Returns an instance of matplotlib.patches.PathPatch.
+
+    Example (using Shapely Point and a matplotlib axes)::
+
+        b = shapely.geometry.Point(0, 0).buffer(1.0)
+        patch = _PolygonPatch(b, fc='blue', ec='blue', alpha=0.5)
+        ax.add_patch(patch)
+
+    Emoatlas originally relied on the descartes package by Sean Gillies
+    (BSD license, https://pypi.org/project/descartes) for PolygonPatch, but
+    this dependency was removed in favor of the below matplotlib code.
+    """
+    from matplotlib.patches import PathPatch
+    from matplotlib.path import Path
+    import numpy as np
+
+    path = Path.make_compound_path(
+        Path(np.asarray(polygon.exterior.coords)[:, :2]),
+        *[Path(np.asarray(ring.coords)[:, :2]) for ring in polygon.interiors],
+    )
+    return PathPatch(path, **kwargs)
 
 
 def emo_params(emotion):
@@ -199,8 +229,8 @@ def _petal_shape_emotion(
     else:
         alpha = 0.0
 
-    ax.add_patch(descartes.PolygonPatch(petal, fc="white", lw=0, alpha=1, zorder=0))
-    ax.add_patch(descartes.PolygonPatch(petal, fc=color, lw=0, alpha=alpha, zorder=10))
+    ax.add_patch(PolygonPatch(petal, fc="white", lw=0, alpha=1, zorder=0))
+    ax.add_patch(PolygonPatch(petal, fc=color, lw=0, alpha=alpha, zorder=10))
 
     return petal
 
@@ -444,19 +474,15 @@ def _petal_circle(
         alpha1 = 0.5 if highlight == "regular" else 0.0
 
         # Drawing separately the shape and a thicker border
-        ax.add_patch(
-            descartes.PolygonPatch(area, fc=color, ec="black", lw=0, alpha=alpha1)
-        )
-        ax.add_patch(descartes.PolygonPatch(area, fc=(0, 0, 0, 0), ec=ecol, lw=1.3))
+        ax.add_patch(PolygonPatch(area, fc=color, ec="black", lw=0, alpha=alpha1))
+        ax.add_patch(PolygonPatch(area, fc=(0, 0, 0, 0), ec=ecol, lw=1.3))
 
         # The innermost circle gets to be brighter because of the repeated overlap
         # Its alpha is diminished to avoid too much bright colors
         if inner:
             alpha2 = 0.3 if highlight == "regular" else 0.0
-            ax.add_patch(
-                descartes.PolygonPatch(area, fc=color, ec="w", lw=0, alpha=alpha2)
-            )
-            ax.add_patch(descartes.PolygonPatch(area, fc=(0, 0, 0, 0), ec=ecol, lw=1.5))
+            ax.add_patch(PolygonPatch(area, fc=color, ec="w", lw=0, alpha=alpha2))
+            ax.add_patch(PolygonPatch(area, fc=(0, 0, 0, 0), ec=ecol, lw=1.5))
 
 
 def _draw_emotion_petal(
@@ -730,4 +756,4 @@ def _outer_border(
         alpha,
     )
 
-    ax.add_patch(descartes.PolygonPatch(petal, fc=(0, 0, 0, 0), ec=ecol, lw=1))
+    ax.add_patch(PolygonPatch(petal, fc=(0, 0, 0, 0), ec=ecol, lw=1))

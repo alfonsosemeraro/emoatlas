@@ -11,7 +11,6 @@ repository available at https://www.github.com/alfonsosemeraro/pyplutchik
 """
 
 import shapely.geometry as sg
-import descartes
 from math import sqrt, cos, sin, radians
 from matplotlib import colors
 

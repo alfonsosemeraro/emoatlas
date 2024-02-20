@@ -123,10 +123,12 @@ def _zscores(
     # N is in the lookup table
     if N in lookup:
         zscores = {
-            emo: (emotion_words[emo].get("count", 0) - lookup[N][emo]["mean"])
-            / lookup[N][emo]["std"]
-            if lookup[N][emo]["std"]
-            else 0
+            emo: (
+                (emotion_words[emo].get("count", 0) - lookup[N][emo]["mean"])
+                / lookup[N][emo]["std"]
+                if lookup[N][emo]["std"]
+                else 0
+            )
             for emo in emotions
         }
         return zscores
@@ -158,10 +160,12 @@ def _zscores(
 
     # Get z-scores
     zscores = {
-        emo: (emotion_words[emo].get("count", 0) - all_samples[emo]["mean"])
-        / all_samples[emo]["std"]
-        if all_samples[emo]["std"]
-        else 0
+        emo: (
+            (emotion_words[emo].get("count", 0) - all_samples[emo]["mean"])
+            / all_samples[emo]["std"]
+            if all_samples[emo]["std"]
+            else 0
+        )
         for emo in emotions
     }
 
