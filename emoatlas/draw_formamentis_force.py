@@ -121,7 +121,8 @@ def _edge_color(w1, w2, _positive, _negative, _ambivalent, colz):
 
 
 def draw_formamentis_force_layout(
-    edgelist, highlight=[], language="english", thickness=1, ax=None, translated=False
+    edgelist, highlight=[], language="english", thickness=1, ax=None, translated=False,
+    alpha_syntactic = 0.5, alpha_hypernyms = 0.5, alpha_synonyms = 0.5 
 ):
     """ """
 
@@ -210,15 +211,19 @@ def draw_formamentis_force_layout(
 
     patches = []
     colors = []
+    alphas = []
     j = 0
     for x, y in edgelist:
 
         if edge_type[j] == "synonyms":
             color = colz["synonyms"]
+            alpha = 0.2 * (alpha_synonyms * 2)
         elif edge_type[j] == "hypernyms":
             color = colz["hypernyms"]
+            alpha = 0.2 * (alpha_hypernyms * 2)
 
         else:
+            alpha = 0.2 * (alpha_syntactic * 2)
             color = _edge_color(x, y, _positive, _negative, _ambivalent, colz)
 
         if louv[x] != louv[y]:
@@ -227,6 +232,7 @@ def draw_formamentis_force_layout(
             c2 = centroids[louv[y]]
             patches.append(_compute_link(pos[x], pos[y], c1, c2))
             colors.append(color)
+            alphas.append(alpha)
 
         else:
             plt.plot(
@@ -234,11 +240,14 @@ def draw_formamentis_force_layout(
                 [pos[x][1], pos[y][1]],
                 color=color,
                 linewidth=thickness,
-                alpha=0.2,
-                zorder=-1,
+                alpha=alpha,
+                zorder=-1
             )
 
         j += 1
+
+    #Darker alphas for this type of edges:
+    alphas = [x * 1.5 for x in alphas]
 
     patches = PatchCollection(
         patches,
@@ -246,7 +255,7 @@ def draw_formamentis_force_layout(
         linewidth=thickness,
         edgecolor=colors,
         match_original=True,
-        alpha=0.3,
+        alpha=alphas,
         zorder=0,
     )
     ax.add_collection(patches)

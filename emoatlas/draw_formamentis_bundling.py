@@ -133,7 +133,8 @@ def _hex_to_rgb(value):
 
 
 def draw_formamentis_circle_layout(
-    fmn, highlight=[], language="english", thickness=15, ax=None, translated=False
+    fmn, highlight=[], language="english", thickness=15, ax=None, translated=False,
+    alpha_syntactic = 0.5, alpha_hypernyms = 0.5, alpha_synonyms = 0.5 
 ):
     """ """
 
@@ -298,9 +299,7 @@ def draw_formamentis_circle_layout(
     j = 0
     for s, t in edgelist:
         alpha, patch = _draw_edge(s, t, pos, louv)
-        alphas.append(alpha)
-        patches.append(patch)
-
+        
         color, linewidth, zorder = _edge_params(
             s, t, _positive, _negative, _ambivalent, thickness, colz
         )
@@ -308,9 +307,16 @@ def draw_formamentis_circle_layout(
         # Patch: if the edge is semantic we should color it as semantic
         if edge_type[j] == "synonyms":
             color = colz["synonyms"]
-        if edge_type[j] == "hypernyms":
+            alpha = alpha*(2*alpha_synonyms)
+        elif edge_type[j] == "hypernyms":
             color = colz["hypernyms"]
+            alpha = alpha*(2*alpha_hypernyms)
+        else:
+            alpha = alpha*(2*alpha_syntactic)
 
+        alphas.append(alpha)
+        patches.append(patch)
+        
         colors.append(color)
         lws.append(linewidth)
         zors.append(zorder)

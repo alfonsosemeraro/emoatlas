@@ -277,6 +277,7 @@ class EmoScores:
 
     def draw_formamentis(
         self, fmn, layout="edge_bundling", highlight=[], thickness=1, ax=None, translated=False,
+        alpha_syntactic = 0.5, alpha_hypernyms = 0.5, alpha_synonyms = 0.5
     ):
         """
         Represents a Formamentis Network in either a circular or force-based layout.
@@ -301,7 +302,25 @@ class EmoScores:
 
         *translated*:
             A boolean value. True for english-translated nodes, False for original node labels. Default is False.
+        
+        *alpha_syntactic*:
+            A numeric. Alpha value for syntactic edges, must be between 0.0 and 1.0
+
+        *alpha_hypernyms*:
+            A numeric. Alpha value for hypernyms edges, must be between 0.0 and 1.0
+    
+        *alpha_synonyms*:
+            A numeric. Alpha value for synonyms edges, must be between 0.0 and 1.0
         """
+
+        # Check if alpha values are within the range [0.0, 1.0]
+        if not (0.0 <= alpha_syntactic <= 1.0):
+            raise ValueError("Alpha value for syntactic must be between 0.0 and 1.0")
+        if not (0.0 <= alpha_hypernyms <= 1.0):
+            raise ValueError("Alpha value for hypernyms must be between 0.0 and 1.0")
+        if not (0.0 <= alpha_synonyms <= 1.0):
+            raise ValueError("Alpha value for synonyms must be between 0.0 and 1.0")
+
 
         if layout == "force_layout":
             dff.draw_formamentis_force_layout(
@@ -310,7 +329,10 @@ class EmoScores:
                 language=self.language,
                 thickness=thickness,
                 ax=ax,
-                translated=translated
+                translated=translated,
+                alpha_syntactic = alpha_syntactic,
+                alpha_hypernyms = alpha_hypernyms,
+                alpha_synonyms = alpha_synonyms 
             )
         elif layout == "edge_bundling":
             dfb.draw_formamentis_circle_layout(
@@ -319,7 +341,10 @@ class EmoScores:
                 language=self.language,
                 thickness=thickness,
                 ax=ax,
-                translated=translated
+                translated=translated,
+                alpha_syntactic = alpha_syntactic,
+                alpha_hypernyms = alpha_hypernyms,
+                alpha_synonyms = alpha_synonyms 
             )
 
     def draw_statistically_significant_emotions(self, obj):
