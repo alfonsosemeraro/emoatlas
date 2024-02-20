@@ -51,7 +51,7 @@ __all__ = [
 
 #     Emoatlas originally relied on the descartes package by Sean Gillies
 #     (BSD license, https://pypi.org/project/descartes) for PolygonPatch, but
-#     this dependency was removed in favor of the below matplotlib code.
+#     this dependency was removed in favor of the below matplotlib code. 
 #     """
 #     from matplotlib.patches import PathPatch
 #     from matplotlib.path import Path
@@ -61,6 +61,7 @@ __all__ = [
 #         *[Path(np.asarray(ring.coords)[:, :2]) for ring in polygon.interiors],
 #     )
 #     return PathPatch(path, **kwargs)
+#   This solution was mutuated from the GeoPandas library (https://geopandas.org/en/stable/).
 
 def _rotate_point(point, angle):
     """
