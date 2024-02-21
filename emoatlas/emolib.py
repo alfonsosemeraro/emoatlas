@@ -29,7 +29,7 @@ class EmoScores:
         if spacy_model is None:
             self._tagger = _load_spacy(language)
         else:
-            self._tagger =  _load_spacy(model = spacy_model)
+            self._tagger = _load_spacy(model=spacy_model)
         self._stemmer = None
         self._stem_or_lem = "lemmatization"
         self._emotionlist = None
@@ -98,7 +98,6 @@ class EmoScores:
         return_words=False,
         convert_emojis=True,
     ):
-
         """
         Count emotions in an input text or Formamentis Network.
 
@@ -144,7 +143,6 @@ class EmoScores:
         )
 
     def zscores(self, obj, baseline=None, n_samples=300, convert_emojis=True):
-
         """
         Checks the emotion distribution in an input text or Formamentis Network against a baseline, and returns the z-scores.
 
@@ -378,7 +376,6 @@ class EmoScores:
         semantic_enrichment=[],
         reject_range=(-1.96, 1.96),
     ):
-
         """
         Draw a Plutchik's wheel of emotions based on a Formamentis Network built upon input text.
         This function is a wrapper of
@@ -449,7 +446,6 @@ class EmoScores:
         title=None,
         title_size=None,
     ):
-
         """
         Draw the emotions or dyads Plutchik flower.
         Full details at https://github.com/alfonsosemeraro/pyplutchik/blob/master/Documentation.md

@@ -11,10 +11,13 @@ repository available at https://www.github.com/alfonsosemeraro/pyplutchik
 """
 
 import shapely.geometry as sg
-#import descartes
+
+# import descartes
 from math import sqrt, cos, sin, radians
 from matplotlib import colors
-#from emoatlas.draw_plutchik import PolygonPatch
+
+# from emoatlas.draw_plutchik import PolygonPatch
+
 
 def PolygonPatch(polygon, **kwargs):
     """Constructs a matplotlib patch from a Polygon geometry
@@ -471,18 +474,14 @@ def _petal_circle(
         alpha1 = 0.5 if highlight == "regular" else 0.0
 
         # Drawing separately the shape and a thicker border
-        ax.add_patch(
-            PolygonPatch(area, fc=color, ec="black", lw=0, alpha=alpha1)
-        )
+        ax.add_patch(PolygonPatch(area, fc=color, ec="black", lw=0, alpha=alpha1))
         ax.add_patch(PolygonPatch(area, fc=(0, 0, 0, 0), ec=ecol, lw=1.3))
 
         # The innermost circle gets to be brighter because of the repeated overlap
         # Its alpha is diminished to avoid too much bright colors
         if inner:
             alpha2 = 0.3 if highlight == "regular" else 0.0
-            ax.add_patch(
-                PolygonPatch(area, fc=color, ec="w", lw=0, alpha=alpha2)
-            )
+            ax.add_patch(PolygonPatch(area, fc=color, ec="w", lw=0, alpha=alpha2))
             ax.add_patch(PolygonPatch(area, fc=(0, 0, 0, 0), ec=ecol, lw=1.5))
 
 
