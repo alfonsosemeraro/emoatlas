@@ -15,7 +15,7 @@ It has already been used for our analysis of the [semantic and emotional frames 
 emolib installs with pip:
 
 ```
-~$ pip install git+https://github.com/alfonsosemeraro/emoatlas
+~$ pip install emoatlas
 ```
 then install the relevant language using:
 
@@ -24,6 +24,11 @@ then install the relevant language using:
 ```
 the command above installs English, but a list of possible language codes can be found [here](https://spacy.io/usage/models), and different languages installed by changing `en` in the final argument to one of the listed language codes. 
 
+This library uses Natural Language Toolkit (NLTK) as a core dependency. If this is the first time you're using NLTK, you need to download its data depending on the language you are interested in.
+```python
+import nltk
+nltk.download('wordnet') #English
+```
 
 ## Usage
 See the Jupyter notebooks in `demos/` for examples of how to use emoatlas ([Jupyter notebook](https://github.com/jupyter/notebook) required). Guides and other information on the package are also available in that folder.
