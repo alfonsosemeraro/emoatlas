@@ -7,6 +7,7 @@ import re
 from emoatlas.language_dependencies import _check_language
 import itertools
 from nltk import word_tokenize
+from emoatlas.resources import _load_spacy, _load_emojis, _load_idiomatic_tokens
 
 
 def multiple_replace(string, rep_dict):
@@ -101,3 +102,23 @@ def _convert_emojis(text, emojis_dict):
     ]
     text = "".join(text)
     return text
+
+
+# Used if you are only interested in lemmatizing texts
+def lemmatize_text(text, language="english", idiomaticreplacement=False):
+    tagger = _load_spacy(language)
+    if idiomaticreplacement:
+        idiomatictokens = _load_idiomatic_tokens(language)
+    else:
+        idiomatictokens = {}
+    emojis = _load_emojis(language)
+
+    lemmatized = _load_object(
+        text,
+        language=language,
+        tagger=tagger,
+        idiomatic_tokens=idiomatictokens,
+        convert_emojis=True,
+        emojis_dict=emojis,
+    )
+    print(lemmatized)

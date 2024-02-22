@@ -2,12 +2,34 @@ import matplotlib.patches as mpatches
 import matplotlib.path as mpath
 from matplotlib.collections import PatchCollection
 import networkx as nx
+from deep_translator import GoogleTranslator
 
 import community.community_louvain as commlouv
 from emoatlas.resources import _valences
 import matplotlib.pyplot as plt
 from math import cos, sin, radians
 from decimal import Decimal as D
+
+language_codes = {
+    "catalan": "ca",
+    "chinese": "zh",
+    "danish": "da",
+    "dutch": "nl",
+    "english": "en",
+    "french": "fr",
+    "german": "de",
+    "greek": "el",
+    "italian": "it",
+    "japanese": "ja",
+    "lithuanian": "lt",
+    "macedonian": "mk",
+    "norwegian": "no",
+    "polish": "pl",
+    "portoguese": "pt",
+    "romanian": "ro",
+    "russian": "ru",
+    "spanish": "es",
+}
 
 
 def _rotate_point(point, angle):
@@ -46,6 +68,10 @@ def _label_rot_params(i, N, d):
         align2 = "top"
     elif i <= N * 0.75:
         rotation = 270 + round(d * i) % 90
+        # fixing bug horizontal
+        if (round(d * i) % 90) <= 0.0000001:
+            rotation = round(d * i)
+            rotation += 90
         align1 = "left"
         align2 = "top"
     else:
@@ -108,7 +134,15 @@ def _hex_to_rgb(value):
 
 
 def draw_formamentis_circle_layout(
-    fmn, highlight=[], language="english", thickness=15, ax=None
+    fmn,
+    highlight=[],
+    language="english",
+    thickness=15,
+    ax=None,
+    translated=False,
+    alpha_syntactic=0.5,
+    alpha_hypernyms=0.5,
+    alpha_synonyms=0.5,
 ):
     """ """
 
@@ -116,8 +150,8 @@ def draw_formamentis_circle_layout(
     colz = {
         "positive": (26 / 256, 133 / 256, 255 / 256),
         "negative": (255 / 256, 25 / 256, 25 / 256),  # (212/256, 17/256, 89/256),
-        "synonyms": (34 / 256, 139 / 256, 34 / 256),
-        "hypernyms": (12 / 256, 76 / 256, 12 / 256),
+        "synonyms": (0 / 256, 158 / 256, 115 / 256),
+        "hypernyms": (230 / 256, 159 / 256, 0 / 256),
         "semipositive": (117 / 256, 152 / 256, 191 / 256),
         "seminegative": (200 / 256, 50 / 256, 50 / 256),
     }  # (196/256, 128/256, 153/256)}
@@ -206,32 +240,70 @@ def draw_formamentis_circle_layout(
         else:
             color = "#030303"
 
-        if v in highlight:
-            ax.text(
-                x,
-                y,
-                " {} ".format(v),
-                rotation=rotation,
-                weight="bold",
-                bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
-                rotation_mode="anchor",
-                ha=align1,
-                va=align2,
-                fontsize=fz,
-                color=color,
-            )
-        else:
-            ax.text(
-                x,
-                y,
-                " {} ".format(v),
-                rotation=rotation,
-                rotation_mode="anchor",
-                ha=align1,
-                va=align2,
-                fontsize=fz,
-                color=color,
-            )
+        if translated == False:
+            if v in highlight:
+                ax.text(
+                    x,
+                    y,
+                    " {} ".format(v),
+                    rotation=rotation,
+                    weight="bold",
+                    bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
+                    rotation_mode="anchor",
+                    ha=align1,
+                    va=align2,
+                    fontsize=fz,
+                    color=color,
+                )
+            else:
+                ax.text(
+                    x,
+                    y,
+                    " {} ".format(v),
+                    rotation=rotation,
+                    rotation_mode="anchor",
+                    ha=align1,
+                    va=align2,
+                    fontsize=fz,
+                    color=color,
+                )
+
+        elif translated == True:
+
+            if v in highlight:
+                ax.text(
+                    x,
+                    y,
+                    " {} ".format(
+                        GoogleTranslator(source=language_codes[language], target="en")
+                        .translate(v)
+                        .lower()
+                    ),
+                    rotation=rotation,
+                    weight="bold",
+                    bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
+                    rotation_mode="anchor",
+                    ha=align1,
+                    va=align2,
+                    fontsize=fz,
+                    color=color,
+                )
+            else:
+                ax.text(
+                    x,
+                    y,
+                    " {} ".format(
+                        GoogleTranslator(source=language_codes[language], target="en")
+                        .translate(v)
+                        .lower()
+                    ),
+                    rotation=rotation,
+                    rotation_mode="anchor",
+                    ha=align1,
+                    va=align2,
+                    fontsize=fz,
+                    color=color,
+                )
 
     ## DRAW ARCHS
     patches = []
@@ -243,8 +315,6 @@ def draw_formamentis_circle_layout(
     j = 0
     for s, t in edgelist:
         alpha, patch = _draw_edge(s, t, pos, louv)
-        alphas.append(alpha)
-        patches.append(patch)
 
         color, linewidth, zorder = _edge_params(
             s, t, _positive, _negative, _ambivalent, thickness, colz
@@ -253,8 +323,15 @@ def draw_formamentis_circle_layout(
         # Patch: if the edge is semantic we should color it as semantic
         if edge_type[j] == "synonyms":
             color = colz["synonyms"]
-        if edge_type[j] == "hypernyms":
+            alpha = alpha * (2 * alpha_synonyms)
+        elif edge_type[j] == "hypernyms":
             color = colz["hypernyms"]
+            alpha = alpha * (2 * alpha_hypernyms)
+        else:
+            alpha = alpha * (2 * alpha_syntactic)
+
+        alphas.append(alpha)
+        patches.append(patch)
 
         colors.append(color)
         lws.append(linewidth)
