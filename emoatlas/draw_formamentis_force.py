@@ -31,6 +31,7 @@ language_codes = {
     "spanish": "es",
 }
 
+
 def _rotate_point(point, angle):
     """
     Rotate a point counterclockwise by a given angle around a given origin.
@@ -121,8 +122,15 @@ def _edge_color(w1, w2, _positive, _negative, _ambivalent, colz):
 
 
 def draw_formamentis_force_layout(
-    edgelist, highlight=[], language="english", thickness=1, ax=None, translated=False,
-    alpha_syntactic = 0.5, alpha_hypernyms = 0.5, alpha_synonyms = 0.5 
+    edgelist,
+    highlight=[],
+    language="english",
+    thickness=1,
+    ax=None,
+    translated=False,
+    alpha_syntactic=0.5,
+    alpha_hypernyms=0.5,
+    alpha_synonyms=0.5,
 ):
     """ """
 
@@ -241,12 +249,12 @@ def draw_formamentis_force_layout(
                 color=color,
                 linewidth=thickness,
                 alpha=alpha,
-                zorder=-1
+                zorder=-1,
             )
 
         j += 1
 
-    #Darker alphas for this type of edges:
+    # Darker alphas for this type of edges:
     alphas = [x * 1.5 for x in alphas]
 
     patches = PatchCollection(
@@ -275,7 +283,7 @@ def draw_formamentis_force_layout(
         zorder = int(degs[key] * 6)
         weight = "regular"
 
-    if translated==True:
+    if translated == True:
         for key, val in pos.items():
             fontsize = minfont + 5 * (degs[key] ** 3)
             zorder = int(degs[key] * 6)
@@ -289,7 +297,9 @@ def draw_formamentis_force_layout(
             if key in _positive:
                 # shadow!
                 plt.annotate(
-                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    GoogleTranslator(source=language_codes[language], target="en")
+                    .translate(key)
+                    .lower(),
                     xy=(val[0] * 1.01, val[1] * 1.005),
                     zorder=maxorder,
                     fontsize=fontsize,
@@ -304,7 +314,9 @@ def draw_formamentis_force_layout(
                 )
 
                 plt.annotate(
-                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    GoogleTranslator(source=language_codes[language], target="en")
+                    .translate(key)
+                    .lower(),
                     xy=(val[0], val[1]),
                     zorder=maxorder,
                     fontsize=fontsize,
@@ -321,7 +333,9 @@ def draw_formamentis_force_layout(
             elif key in _negative:
                 # shadow!
                 plt.annotate(
-                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    GoogleTranslator(source=language_codes[language], target="en")
+                    .translate(key)
+                    .lower(),
                     xy=(val[0] * 1.01, val[1] * 1.005),
                     zorder=maxorder,
                     fontsize=fontsize,
@@ -336,7 +350,9 @@ def draw_formamentis_force_layout(
                 )
 
                 plt.annotate(
-                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    GoogleTranslator(source=language_codes[language], target="en")
+                    .translate(key)
+                    .lower(),
                     xy=(val[0], val[1]),
                     zorder=maxorder,
                     fontsize=fontsize,
@@ -353,7 +369,9 @@ def draw_formamentis_force_layout(
             elif key in _ambivalent:
                 # shadow!
                 plt.annotate(
-                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    GoogleTranslator(source=language_codes[language], target="en")
+                    .translate(key)
+                    .lower(),
                     xy=(val[0] * 1.01, val[1] * 1.005),
                     zorder=maxorder,
                     fontsize=fontsize,
@@ -368,7 +386,9 @@ def draw_formamentis_force_layout(
                 )
 
                 plt.annotate(
-                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    GoogleTranslator(source=language_codes[language], target="en")
+                    .translate(key)
+                    .lower(),
                     xy=(val[0], val[1]),
                     zorder=maxorder,
                     fontsize=fontsize,
@@ -384,7 +404,9 @@ def draw_formamentis_force_layout(
 
             else:
                 plt.annotate(
-                    GoogleTranslator(source=language_codes[language], target='en').translate(key).lower(),
+                    GoogleTranslator(source=language_codes[language], target="en")
+                    .translate(key)
+                    .lower(),
                     xy=(val[0], val[1]),
                     zorder=zorder,
                     fontsize=fontsize,
@@ -396,7 +418,7 @@ def draw_formamentis_force_layout(
                         linewidth=1,
                     ),
                 )
-    else:   #translated=false
+    else:  # translated=false
         for key, val in pos.items():
             fontsize = minfont + 5 * (degs[key] ** 3)
             zorder = int(degs[key] * 6)

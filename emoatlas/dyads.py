@@ -13,7 +13,7 @@ repository available at https://www.github.com/alfonsosemeraro/pyplutchik
 import shapely.geometry as sg
 from math import sqrt, cos, sin, radians
 from matplotlib import colors
-
+import emoatlas.emotions as _emo_pluthick_
 
 def dyad_params(dyad):
     """
@@ -321,7 +321,7 @@ def _outer_border(
         alpha,
     )
 
-    ax.add_patch(descartes.PolygonPatch(petal, fc=(0, 0, 0, 0), ec=ecol, lw=1))
+    ax.add_patch(_emo_pluthick_.PolygonPatch(petal, fc=(0, 0, 0, 0), ec=ecol, lw=1))
 
 
 def _petal_shape_dyad(
@@ -433,7 +433,7 @@ def _petal_shape_dyad(
     petalB = petal.intersection(square_right)
 
     # white petal underneath
-    ax.add_patch(descartes.PolygonPatch(petal, fc="white", lw=0, alpha=1, zorder=0))
+    ax.add_patch(_emo_pluthick_.PolygonPatch(petal, fc="white", lw=0, alpha=1, zorder=0))
 
     # Draw each half-petal in alpha 0.7
     alpha = 0.7
@@ -688,18 +688,18 @@ def _petal_circle(
 
         # Drawing separately the shape and a thicker border
         ax.add_patch(
-            descartes.PolygonPatch(area, fc=color, ec="black", lw=0, alpha=alpha1)
+            _emo_pluthick_.PolygonPatch(area, fc=color, ec="black", lw=0, alpha=alpha1)
         )
-        ax.add_patch(descartes.PolygonPatch(area, fc=(0, 0, 0, 0), ec=ecol, lw=1.3))
+        ax.add_patch(_emo_pluthick_.PolygonPatch(area, fc=(0, 0, 0, 0), ec=ecol, lw=1.3))
 
         # The innermost circle gets to be brighter because of the repeated overlap
         # Its alpha is diminished to avoid too much bright colors
         if inner:
             alpha2 = 0.3 if highlight == "regular" else 0.0
             ax.add_patch(
-                descartes.PolygonPatch(area, fc=color, ec="w", lw=0, alpha=alpha2)
+                _emo_pluthick_.PolygonPatch(area, fc=color, ec="w", lw=0, alpha=alpha2)
             )
-            ax.add_patch(descartes.PolygonPatch(area, fc=(0, 0, 0, 0), ec=ecol, lw=1.5))
+            ax.add_patch(_emo_pluthick_.PolygonPatch(area, fc=(0, 0, 0, 0), ec=ecol, lw=1.5))
 
 
 def _draw_dyad_petal(

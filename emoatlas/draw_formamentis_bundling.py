@@ -31,6 +31,7 @@ language_codes = {
     "spanish": "es",
 }
 
+
 def _rotate_point(point, angle):
     """
     Rotate a point counterclockwise by a given angle around a given origin.
@@ -67,9 +68,9 @@ def _label_rot_params(i, N, d):
         align2 = "top"
     elif i <= N * 0.75:
         rotation = 270 + round(d * i) % 90
-        #fixing bug horizontal
+        # fixing bug horizontal
         if (round(d * i) % 90) <= 0.0000001:
-            rotation = round(d * i) 
+            rotation = round(d * i)
             rotation += 90
         align1 = "left"
         align2 = "top"
@@ -133,8 +134,15 @@ def _hex_to_rgb(value):
 
 
 def draw_formamentis_circle_layout(
-    fmn, highlight=[], language="english", thickness=15, ax=None, translated=False,
-    alpha_syntactic = 0.5, alpha_hypernyms = 0.5, alpha_synonyms = 0.5 
+    fmn,
+    highlight=[],
+    language="english",
+    thickness=15,
+    ax=None,
+    translated=False,
+    alpha_syntactic=0.5,
+    alpha_hypernyms=0.5,
+    alpha_synonyms=0.5,
 ):
     """ """
 
@@ -266,7 +274,11 @@ def draw_formamentis_circle_layout(
                 ax.text(
                     x,
                     y,
-                    " {} ".format(GoogleTranslator(source=language_codes[language], target='en').translate(v).lower()),
+                    " {} ".format(
+                        GoogleTranslator(source=language_codes[language], target="en")
+                        .translate(v)
+                        .lower()
+                    ),
                     rotation=rotation,
                     weight="bold",
                     bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
@@ -280,7 +292,11 @@ def draw_formamentis_circle_layout(
                 ax.text(
                     x,
                     y,
-                    " {} ".format(GoogleTranslator(source=language_codes[language], target='en').translate(v).lower()),
+                    " {} ".format(
+                        GoogleTranslator(source=language_codes[language], target="en")
+                        .translate(v)
+                        .lower()
+                    ),
                     rotation=rotation,
                     rotation_mode="anchor",
                     ha=align1,
@@ -288,7 +304,7 @@ def draw_formamentis_circle_layout(
                     fontsize=fz,
                     color=color,
                 )
-    
+
     ## DRAW ARCHS
     patches = []
     alphas = []
@@ -299,7 +315,7 @@ def draw_formamentis_circle_layout(
     j = 0
     for s, t in edgelist:
         alpha, patch = _draw_edge(s, t, pos, louv)
-        
+
         color, linewidth, zorder = _edge_params(
             s, t, _positive, _negative, _ambivalent, thickness, colz
         )
@@ -307,16 +323,16 @@ def draw_formamentis_circle_layout(
         # Patch: if the edge is semantic we should color it as semantic
         if edge_type[j] == "synonyms":
             color = colz["synonyms"]
-            alpha = alpha*(2*alpha_synonyms)
+            alpha = alpha * (2 * alpha_synonyms)
         elif edge_type[j] == "hypernyms":
             color = colz["hypernyms"]
-            alpha = alpha*(2*alpha_hypernyms)
+            alpha = alpha * (2 * alpha_hypernyms)
         else:
-            alpha = alpha*(2*alpha_syntactic)
+            alpha = alpha * (2 * alpha_syntactic)
 
         alphas.append(alpha)
         patches.append(patch)
-        
+
         colors.append(color)
         lws.append(linewidth)
         zors.append(zorder)
