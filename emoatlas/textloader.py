@@ -121,4 +121,4 @@ def lemmatize_text(text, language="english", idiomaticreplacement=False):
         convert_emojis=True,
         emojis_dict=emojis,
     )
-    print(lemmatized)
+    return lemmatized
