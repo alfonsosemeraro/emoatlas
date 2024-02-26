@@ -30,11 +30,13 @@ import nltk
 nltk.download('wordnet') #English
 ```
 
-## Usage
-See the Jupyter notebooks in `demos/` for examples of how to use emoatlas ([Jupyter notebook](https://github.com/jupyter/notebook) required). Guides and other information on the package are also available in that folder.
+## Usage and Guides
+See the Jupyter notebooks in `demos/` for examples of how to use emoatlas ([Jupyter notebook](https://github.com/jupyter/notebook) required). **Guides and other information about the package are also available in that folder.**
 
 #### Google Colab
 A Google Colab simple demo is also available [here](https://colab.research.google.com/drive/1qzymy0-5EXv3E6dQ0c_D3mv8tyvjSduX?usp=sharing).
+
+It is suggested to refer to the guides of the `demos/` folder to understand how to use the package.
 
 ## Acknowledgements
 Thanks to [@FinleyGibson](https://github.com/FinleyGibson) and [@GiulioRossetti](https://github.com/GiulioRossetti) for their contribution to the testing, debugging and refactoring this library.
