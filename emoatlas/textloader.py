@@ -105,7 +105,7 @@ def _convert_emojis(text, emojis_dict):
 
 
 # Used if you are only interested in lemmatizing texts
-def lemmatize_text(text, language="english", idiomaticreplacement=False):
+def lemmatize_text(text, fmnt, language="english", idiomaticreplacement=False, remove_stopwords=True):
     tagger = _load_spacy(language)
     if idiomaticreplacement:
         idiomatictokens = _load_idiomatic_tokens(language)
@@ -121,4 +121,8 @@ def lemmatize_text(text, language="english", idiomaticreplacement=False):
         convert_emojis=True,
         emojis_dict=emojis,
     )
+
+    if remove_stopwords == True:
+        lemmatized = [word for word in lemmatized if word in fmnt.vertices]
+
     return lemmatized
