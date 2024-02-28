@@ -352,7 +352,7 @@ class EmoScores:
                 alpha_synonyms=alpha_synonyms,
             )
 
-    def draw_statistically_significant_emotions(self, obj):
+    def draw_statistically_significant_emotions(self, obj, title = None):
         """
         Computes how statistically significantly higher or lower is each emotion in the input text or Formamentis Network.
         It draws the Plutchik's flower highlighting only emotions over/under represented w.r.t. a neutral baseline.
@@ -371,7 +371,7 @@ class EmoScores:
             statistically over (under) represented (p-value = 0.05).
         """
         zs = self.zscores(obj)
-        self.draw_plutchik(zs, reject_range=[-1.96, 1.96])
+        self.draw_plutchik(zs, title = title, reject_range=[-1.96, 1.96])
 
     def draw_formamentis_flower(
         self,
@@ -382,6 +382,7 @@ class EmoScores:
         max_distance=3,
         semantic_enrichment=[],
         reject_range=(-1.96, 1.96),
+        title = None,
     ):
         """
         Draw a Plutchik's wheel of emotions based on a Formamentis Network built upon input text.
@@ -432,7 +433,7 @@ class EmoScores:
         )
 
         zs = self.zscores(fmn)
-        self.draw_plutchik(zs, reject_range=(-1.96, 1.96))
+        self.draw_plutchik(zs, title = title, reject_range=(-1.96, 1.96))
 
     def draw_plutchik(
         self,
