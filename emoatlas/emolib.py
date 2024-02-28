@@ -352,7 +352,7 @@ class EmoScores:
                 alpha_synonyms=alpha_synonyms,
             )
 
-    def draw_statistically_significant_emotions(self, obj, title = None):
+    def draw_statistically_significant_emotions(self, obj, title=None):
         """
         Computes how statistically significantly higher or lower is each emotion in the input text or Formamentis Network.
         It draws the Plutchik's flower highlighting only emotions over/under represented w.r.t. a neutral baseline.
@@ -369,9 +369,13 @@ class EmoScores:
         *reject_range*:
             A threshold for significance of zscores. A zscore higher (lower) than 1.96 (-1.96) means that an emotion is
             statistically over (under) represented (p-value = 0.05).
+
+        *title*:
+            Title for the plot.
+
         """
         zs = self.zscores(obj)
-        self.draw_plutchik(zs, title = title, reject_range=[-1.96, 1.96])
+        self.draw_plutchik(zs, title=title, reject_range=[-1.96, 1.96])
 
     def draw_formamentis_flower(
         self,
@@ -382,7 +386,7 @@ class EmoScores:
         max_distance=3,
         semantic_enrichment=[],
         reject_range=(-1.96, 1.96),
-        title = None,
+        title=None,
     ):
         """
         Draw a Plutchik's wheel of emotions based on a Formamentis Network built upon input text.
@@ -417,6 +421,8 @@ class EmoScores:
             A str or a list of str. If 'synonyms', will be added semantic arcs between synonyms into the network. If 'hyperonyms', will be
             added semantic arcs between hyperonyms and hyponyms. Also ['synonyms', 'hyperonyms'] is accepted.
 
+        *title*:
+            Title for the plot.
 
         *reject_range*:
             A threshold for significance of zscores. A zscore higher (lower) than 1.96 (-1.96) means that an emotion is
@@ -433,7 +439,7 @@ class EmoScores:
         )
 
         zs = self.zscores(fmn)
-        self.draw_plutchik(zs, title = title, reject_range=(-1.96, 1.96))
+        self.draw_plutchik(zs, title=title, reject_range=(-1.96, 1.96))
 
     def draw_plutchik(
         self,
