@@ -18,6 +18,8 @@ import emoatlas.draw_plutchik as dp
 from emoatlas.baselines import _load_lookup_table, _make_baseline
 import emoatlas.draw_formamentis_force as dff
 import emoatlas.draw_formamentis_bundling as dfb
+import itertools
+from collections import namedtuple
 
 
 class EmoScores:
@@ -351,6 +353,60 @@ class EmoScores:
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
             )
+
+    def extract_word_from_formamentis(self, fmn, target_word):
+        """
+        Extract the semantic frame of a single word from a formamentis network.
+
+        Required arguments:
+        *fmn*:
+            A Formamentis Network to visualize.
+        *target_word*:
+            A string. This  only of the neighborhood of 'target_word' in the formamentis network.
+
+        Returns:
+        ----------
+        *fmnt*:
+            A Formamentis Network of the target word.
+        """
+
+        if type(fmn.edges) != dict:
+            # Get our vertices set
+            new_edgelist = [edge for edge in fmn.edges if target_word in edge]
+            final_vertex = set(itertools.chain(*new_edgelist))
+
+            # If both words of each edgelist are in our vertices, consider them.
+            final_edgelist = [
+                edge
+                for edge in fmn.edges
+                if (edge[0] in final_vertex) and (edge[1] in final_vertex)
+            ]
+
+            FormamentisNetwork = namedtuple("FormamentisNetwork", "edges vertices")
+            return FormamentisNetwork(final_edgelist, list(final_vertex))
+        else:
+
+            # Get our vertices set
+            final_vertex = set()
+            edge_types = list(fmn.edges.keys())
+            for edge_type in edge_types:
+                new_edgelist = [
+                    edge for edge in fmn.edges[edge_type] if target_word in edge
+                ]
+                final_vertex = final_vertex | set(itertools.chain(*new_edgelist))
+
+            # If both words of each edgelist are in our vertices, consider them.
+            final_edgelist = {}
+            for edge_type in edge_types:
+                new_edgelist = [
+                    edge
+                    for edge in fmn.edges[edge_type]
+                    if (edge[0] in final_vertex) and (edge[1] in final_vertex)
+                ]
+                final_edgelist[edge_type] = new_edgelist
+
+            FormamentisNetwork = namedtuple("FormamentisNetwork", "edges vertices")
+            return FormamentisNetwork(final_edgelist, list(final_vertex))
 
     def draw_statistically_significant_emotions(self, obj, title=None):
         """
