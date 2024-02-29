@@ -282,6 +282,7 @@ class EmoScores:
         highlight=[],
         thickness=1,
         ax=None,
+        hide_label=False,
         translated=False,
         alpha_syntactic=0.5,
         alpha_hypernyms=0.5,
@@ -307,6 +308,9 @@ class EmoScores:
 
         *ax*:
             A matplotlib axes to draw the network on. If none is provided, a new one will be created.
+
+        *hide_label*:
+            A boolean value. If True, labels of words will not be visible.
 
         *translated*:
             A boolean value. True for english-translated nodes, False for original node labels. Default is False.
@@ -336,6 +340,7 @@ class EmoScores:
                 language=self.language,
                 thickness=thickness,
                 ax=ax,
+                hide_label=hide_label,
                 translated=translated,
                 alpha_syntactic=alpha_syntactic,
                 alpha_hypernyms=alpha_hypernyms,
@@ -348,6 +353,7 @@ class EmoScores:
                 language=self.language,
                 thickness=thickness,
                 ax=ax,
+                hide_label=hide_label,
                 translated=translated,
                 alpha_syntactic=alpha_syntactic,
                 alpha_hypernyms=alpha_hypernyms,
