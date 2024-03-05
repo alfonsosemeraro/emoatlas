@@ -366,9 +366,9 @@ class EmoScores:
 
         Required arguments:
         *fmn*:
-            A Formamentis Network to visualize.
+            The formamentis from which the word must be extracted.
         *target_word*:
-            A string. This  only of the neighborhood of 'target_word' in the formamentis network.
+            A string. Only the edges that are related to this word will be extracted.
 
         Returns:
         ----------
