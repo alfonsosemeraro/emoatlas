@@ -205,10 +205,18 @@ def _get_edges_vertex(
 
             # should you keep the word? Yes if it is in keeppos or it is a negation or a pronoun
             keep = token.pos_ in keeppos
+
+            # Get the token after the lemmatization
+            tokenlemma_noindex = token.lemma_.split("__")[1]
+            tokenlemma_noindex = nlp(tokenlemma_noindex)[0]
+
             # reasons to overtake on keep
             nokeep = (
                 (token.text in stopwords)
                 or (token.is_stop)
+                or (
+                    tokenlemma_noindex.is_stop
+                )  # Remove token even if the lemmatized token is in stopwords
                 or len(token.text) <= 2
                 or bool(re.search("[0-9]", token.text))
             )

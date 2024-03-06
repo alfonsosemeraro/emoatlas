@@ -139,6 +139,7 @@ def draw_formamentis_circle_layout(
     language="english",
     thickness=15,
     ax=None,
+    hide_label=False,
     translated=False,
     alpha_syntactic=0.5,
     alpha_hypernyms=0.5,
@@ -240,70 +241,89 @@ def draw_formamentis_circle_layout(
         else:
             color = "#030303"
 
-        if translated == False:
-            if v in highlight:
-                ax.text(
-                    x,
-                    y,
-                    " {} ".format(v),
-                    rotation=rotation,
-                    weight="bold",
-                    bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
-                    rotation_mode="anchor",
-                    ha=align1,
-                    va=align2,
-                    fontsize=fz,
-                    color=color,
-                )
-            else:
-                ax.text(
-                    x,
-                    y,
-                    " {} ".format(v),
-                    rotation=rotation,
-                    rotation_mode="anchor",
-                    ha=align1,
-                    va=align2,
-                    fontsize=fz,
-                    color=color,
-                )
+        if hide_label == True:
+            ax.text(
+                x,
+                y,
+                "",
+                rotation=rotation,
+                weight="bold",
+                bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
+                rotation_mode="anchor",
+                ha=align1,
+                va=align2,
+                fontsize=fz,
+                color=color,
+            )
+        else:
+            if translated == False:
+                if v in highlight:
+                    ax.text(
+                        x,
+                        y,
+                        " {} ".format(v),
+                        rotation=rotation,
+                        weight="bold",
+                        bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
+                        rotation_mode="anchor",
+                        ha=align1,
+                        va=align2,
+                        fontsize=fz,
+                        color=color,
+                    )
+                else:
+                    ax.text(
+                        x,
+                        y,
+                        " {} ".format(v),
+                        rotation=rotation,
+                        rotation_mode="anchor",
+                        ha=align1,
+                        va=align2,
+                        fontsize=fz,
+                        color=color,
+                    )
 
-        elif translated == True:
+            elif translated == True:
 
-            if v in highlight:
-                ax.text(
-                    x,
-                    y,
-                    " {} ".format(
-                        GoogleTranslator(source=language_codes[language], target="en")
-                        .translate(v)
-                        .lower()
-                    ),
-                    rotation=rotation,
-                    weight="bold",
-                    bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
-                    rotation_mode="anchor",
-                    ha=align1,
-                    va=align2,
-                    fontsize=fz,
-                    color=color,
-                )
-            else:
-                ax.text(
-                    x,
-                    y,
-                    " {} ".format(
-                        GoogleTranslator(source=language_codes[language], target="en")
-                        .translate(v)
-                        .lower()
-                    ),
-                    rotation=rotation,
-                    rotation_mode="anchor",
-                    ha=align1,
-                    va=align2,
-                    fontsize=fz,
-                    color=color,
-                )
+                if v in highlight:
+                    ax.text(
+                        x,
+                        y,
+                        " {} ".format(
+                            GoogleTranslator(
+                                source=language_codes[language], target="en"
+                            )
+                            .translate(v)
+                            .lower()
+                        ),
+                        rotation=rotation,
+                        weight="bold",
+                        bbox=dict(facecolor="none", edgecolor=color, linewidth=3),
+                        rotation_mode="anchor",
+                        ha=align1,
+                        va=align2,
+                        fontsize=fz,
+                        color=color,
+                    )
+                else:
+                    ax.text(
+                        x,
+                        y,
+                        " {} ".format(
+                            GoogleTranslator(
+                                source=language_codes[language], target="en"
+                            )
+                            .translate(v)
+                            .lower()
+                        ),
+                        rotation=rotation,
+                        rotation_mode="anchor",
+                        ha=align1,
+                        va=align2,
+                        fontsize=fz,
+                        color=color,
+                    )
 
     ## DRAW ARCHS
     patches = []

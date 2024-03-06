@@ -18,6 +18,8 @@ import emoatlas.draw_plutchik as dp
 from emoatlas.baselines import _load_lookup_table, _make_baseline
 import emoatlas.draw_formamentis_force as dff
 import emoatlas.draw_formamentis_bundling as dfb
+import itertools
+from collections import namedtuple
 
 
 class EmoScores:
@@ -280,6 +282,7 @@ class EmoScores:
         highlight=[],
         thickness=1,
         ax=None,
+        hide_label=False,
         translated=False,
         alpha_syntactic=0.5,
         alpha_hypernyms=0.5,
@@ -305,6 +308,9 @@ class EmoScores:
 
         *ax*:
             A matplotlib axes to draw the network on. If none is provided, a new one will be created.
+
+        *hide_label*:
+            A boolean value. If True, labels of words will not be visible.
 
         *translated*:
             A boolean value. True for english-translated nodes, False for original node labels. Default is False.
@@ -334,6 +340,7 @@ class EmoScores:
                 language=self.language,
                 thickness=thickness,
                 ax=ax,
+                hide_label=hide_label,
                 translated=translated,
                 alpha_syntactic=alpha_syntactic,
                 alpha_hypernyms=alpha_hypernyms,
@@ -346,13 +353,68 @@ class EmoScores:
                 language=self.language,
                 thickness=thickness,
                 ax=ax,
+                hide_label=hide_label,
                 translated=translated,
                 alpha_syntactic=alpha_syntactic,
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
             )
 
-    def draw_statistically_significant_emotions(self, obj):
+    def extract_word_from_formamentis(self, fmn, target_word):
+        """
+        Extract the semantic frame of a single word from a formamentis network.
+
+        Required arguments:
+        *fmn*:
+            The formamentis from which the word must be extracted.
+        *target_word*:
+            A string. Only the edges that are related to this word will be extracted.
+
+        Returns:
+        ----------
+        *fmnt*:
+            A Formamentis Network of the target word.
+        """
+
+        if type(fmn.edges) != dict:
+            # Get our vertices set
+            new_edgelist = [edge for edge in fmn.edges if target_word in edge]
+            final_vertex = set(itertools.chain(*new_edgelist))
+
+            # If both words of each edgelist are in our vertices, consider them.
+            final_edgelist = [
+                edge
+                for edge in fmn.edges
+                if (edge[0] in final_vertex) and (edge[1] in final_vertex)
+            ]
+
+            FormamentisNetwork = namedtuple("FormamentisNetwork", "edges vertices")
+            return FormamentisNetwork(final_edgelist, list(final_vertex))
+        else:
+
+            # Get our vertices set
+            final_vertex = set()
+            edge_types = list(fmn.edges.keys())
+            for edge_type in edge_types:
+                new_edgelist = [
+                    edge for edge in fmn.edges[edge_type] if target_word in edge
+                ]
+                final_vertex = final_vertex | set(itertools.chain(*new_edgelist))
+
+            # If both words of each edgelist are in our vertices, consider them.
+            final_edgelist = {}
+            for edge_type in edge_types:
+                new_edgelist = [
+                    edge
+                    for edge in fmn.edges[edge_type]
+                    if (edge[0] in final_vertex) and (edge[1] in final_vertex)
+                ]
+                final_edgelist[edge_type] = new_edgelist
+
+            FormamentisNetwork = namedtuple("FormamentisNetwork", "edges vertices")
+            return FormamentisNetwork(final_edgelist, list(final_vertex))
+
+    def draw_statistically_significant_emotions(self, obj, title=None):
         """
         Computes how statistically significantly higher or lower is each emotion in the input text or Formamentis Network.
         It draws the Plutchik's flower highlighting only emotions over/under represented w.r.t. a neutral baseline.
@@ -369,9 +431,13 @@ class EmoScores:
         *reject_range*:
             A threshold for significance of zscores. A zscore higher (lower) than 1.96 (-1.96) means that an emotion is
             statistically over (under) represented (p-value = 0.05).
+
+        *title*:
+            Title for the plot.
+
         """
         zs = self.zscores(obj)
-        self.draw_plutchik(zs, reject_range=[-1.96, 1.96])
+        self.draw_plutchik(zs, title=title, reject_range=[-1.96, 1.96])
 
     def draw_formamentis_flower(
         self,
@@ -382,6 +448,7 @@ class EmoScores:
         max_distance=3,
         semantic_enrichment=[],
         reject_range=(-1.96, 1.96),
+        title=None,
     ):
         """
         Draw a Plutchik's wheel of emotions based on a Formamentis Network built upon input text.
@@ -416,6 +483,8 @@ class EmoScores:
             A str or a list of str. If 'synonyms', will be added semantic arcs between synonyms into the network. If 'hyperonyms', will be
             added semantic arcs between hyperonyms and hyponyms. Also ['synonyms', 'hyperonyms'] is accepted.
 
+        *title*:
+            Title for the plot.
 
         *reject_range*:
             A threshold for significance of zscores. A zscore higher (lower) than 1.96 (-1.96) means that an emotion is
@@ -432,7 +501,7 @@ class EmoScores:
         )
 
         zs = self.zscores(fmn)
-        self.draw_plutchik(zs, reject_range=(-1.96, 1.96))
+        self.draw_plutchik(zs, title=title, reject_range=(-1.96, 1.96))
 
     def draw_plutchik(
         self,
