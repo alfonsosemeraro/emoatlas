@@ -11,6 +11,8 @@ from emoatlas.resources import (
     _load_idiomatic_tokens,
     _load_stemmer,
 )
+
+from emoatlas.textloader import _load_object
 import emoatlas.formamentis_edgelist as fme
 import emoatlas.emo_scores as es
 import emoatlas.baselines as bsl
@@ -610,3 +612,32 @@ class EmoScores:
             title=title,
             title_size=title_size,
         )
+
+    # Used if you are only interested in lemmatizing texts
+    def lemmatize_text(
+        self,
+        text,
+    ):
+
+        lemmatized = _load_object(
+            text,
+            language=self.language,
+            tagger=self._tagger,
+            idiomatic_tokens={},
+            convert_emojis=True,
+            emojis_dict=self._emojis_dict,
+        )
+
+        fmnt = fme.get_formamentis_edgelist(
+            text,
+            language=self.language,
+            spacy_model=self._tagger,
+            stemmer=self._stemmer,
+            stem_or_lem=self._stem_or_lem,
+            antonyms=self._antonyms,
+            idiomatic_tokens={},
+        )
+
+        lemmatized = [word for word in lemmatized if word in fmnt.vertices]
+
+        return lemmatized
