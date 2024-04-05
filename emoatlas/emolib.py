@@ -22,6 +22,7 @@ import emoatlas.draw_formamentis_force as dff
 import emoatlas.draw_formamentis_bundling as dfb
 import itertools
 from collections import namedtuple
+import os
 
 
 class EmoScores:
@@ -641,3 +642,38 @@ class EmoScores:
         lemmatized = [word for word in lemmatized if word in fmnt.vertices]
 
         return lemmatized
+
+    def export_formamentis(self, fmnt, path=None, filename=None):
+        """
+        Export the edges of a Formamentis Network to a text file.
+
+        Parameters:
+        -----------
+        fmnt : FormamentisNetwork
+            The Formamentis Network object to extract edges from.
+        path : str, optional
+            The directory path to save the file. Defaults to the current working directory.
+        filename : str, optional
+            The name of the file to save. Defaults to 'extracted_formamentis.txt'.
+
+        Returns:
+        --------
+        None
+        """
+
+        if filename == None:
+            filename = "extracted formamentis.txt"
+        elif not filename.endswith(".txt"):
+            filename += ".txt"
+
+        if path == None:
+            path = os.getcwd()
+
+        # Combine path and filename to get the full file path
+        filepath = os.path.join(path, filename)
+
+        edges = fmnt.edges
+
+        with open(filepath, "w") as file:
+            for pair in edges:
+                file.write(f"{pair[0]} , {pair[1]}\n")
