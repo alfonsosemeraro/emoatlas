@@ -373,8 +373,8 @@ class EmoScores:
         *target_word*:
             A string. Only the edges that are related to this word will be extracted.
 
-        Returns:
         ----------
+        Returns:
         *fmnt*:
             A Formamentis Network of the target word.
         """
@@ -416,6 +416,28 @@ class EmoScores:
 
             FormamentisNetwork = namedtuple("FormamentisNetwork", "edges vertices")
             return FormamentisNetwork(final_edgelist, list(final_vertex))
+
+    def nxgraph_to_formamentis(graph):
+        """
+        Converts a networkx graph to a formamentis network object.
+        CONSIDERS ALL EDGES AS syntactic.
+
+        Required arguments:
+        *graph*:
+            A networkx graph.
+        ----------
+        Returns:
+        *fmnt*:
+            A Formamentis Network of syntactic edges.
+        """
+        FormamentisNetwork = namedtuple("FormamentisNetwork", ["edges", "vertices"])
+
+        # Convert graph edges to list of tuples
+        edges = list(graph.edges())
+        # Convert graph vertices to list
+        vertices = list(graph.nodes())
+        # Create and return FormamentisNetwork namedtuple
+        return FormamentisNetwork(edges=edges, vertices=vertices)
 
     def draw_statistically_significant_emotions(self, obj, title=None):
         """
