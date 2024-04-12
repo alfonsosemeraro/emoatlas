@@ -683,7 +683,6 @@ class EmoScores:
             for pair in edges:
                 file.write(f"{pair[0]} , {pair[1]}\n")
 
-
     def nxgraph_to_formamentis(graph):
         """
         Converts a networkx graph to a formamentis network object.
@@ -697,6 +696,7 @@ class EmoScores:
         *fmnt*:
             A Formamentis Network of syntactic edges.
         """
+
         FormamentisNetwork = namedtuple("FormamentisNetwork", ["edges", "vertices"])
 
         # Convert graph edges to list of tuples
@@ -705,7 +705,7 @@ class EmoScores:
         vertices = list(graph.nodes())
         # Create and return FormamentisNetwork namedtuple
         return FormamentisNetwork(edges=edges, vertices=vertices)
-    
+
     def formamentis_to_nxgraph(fmnt):
         """
         Converts a Formamentis Network to a NetworkX graph.
@@ -718,6 +718,7 @@ class EmoScores:
         *graph*:
             A NetworkX graph.
         """
+
         graph = nx.Graph()
         # Add nodes from vertices
         graph.add_nodes_from(fmnt.vertices)
