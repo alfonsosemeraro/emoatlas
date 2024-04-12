@@ -11,6 +11,8 @@ from emoatlas.resources import (
     _load_idiomatic_tokens,
     _load_stemmer,
 )
+
+from emoatlas.textloader import _load_object
 import emoatlas.formamentis_edgelist as fme
 import emoatlas.emo_scores as es
 import emoatlas.baselines as bsl
@@ -18,8 +20,10 @@ import emoatlas.draw_plutchik as dp
 from emoatlas.baselines import _load_lookup_table, _make_baseline
 import emoatlas.draw_formamentis_force as dff
 import emoatlas.draw_formamentis_bundling as dfb
+import networkx as nx
 import itertools
 from collections import namedtuple
+import os
 
 
 class EmoScores:
@@ -370,8 +374,8 @@ class EmoScores:
         *target_word*:
             A string. Only the edges that are related to this word will be extracted.
 
-        Returns:
         ----------
+        Returns:
         *fmnt*:
             A Formamentis Network of the target word.
         """
@@ -610,3 +614,113 @@ class EmoScores:
             title=title,
             title_size=title_size,
         )
+
+    # Used if you are only interested in lemmatizing texts
+    def lemmatize_text(
+        self,
+        text,
+    ):
+
+        lemmatized = _load_object(
+            text,
+            language=self.language,
+            tagger=self._tagger,
+            idiomatic_tokens={},
+            convert_emojis=True,
+            emojis_dict=self._emojis_dict,
+        )
+
+        fmnt = fme.get_formamentis_edgelist(
+            text,
+            language=self.language,
+            spacy_model=self._tagger,
+            stemmer=self._stemmer,
+            stem_or_lem=self._stem_or_lem,
+            antonyms=self._antonyms,
+            idiomatic_tokens={},
+        )
+
+        lemmatized = [word for word in lemmatized if word in fmnt.vertices]
+
+        return lemmatized
+
+    ######################################
+    # Utilities
+    ######################################
+
+    def export_formamentis(self, fmnt, path=None, filename=None):
+        """
+        Export the edges of a Formamentis Network to a text file.
+
+        Parameters:
+        -----------
+        fmnt : FormamentisNetwork
+            The Formamentis Network object to extract edges from.
+        path : str, optional
+            The directory path to save the file. Defaults to the current working directory.
+        filename : str, optional
+            The name of the file to save. Defaults to 'extracted_formamentis.txt'.
+
+        Returns:
+        --------
+        None
+        """
+
+        if filename == None:
+            filename = "extracted formamentis.txt"
+        elif not filename.endswith(".txt"):
+            filename += ".txt"
+
+        if path == None:
+            path = os.getcwd()
+
+        # Combine path and filename to get the full file path
+        filepath = os.path.join(path, filename)
+
+        edges = fmnt.edges
+
+        with open(filepath, "w") as file:
+            for pair in edges:
+                file.write(f"{pair[0]} , {pair[1]}\n")
+
+
+    def nxgraph_to_formamentis(graph):
+        """
+        Converts a networkx graph to a formamentis network object.
+        CONSIDERS ALL EDGES AS syntactic.
+
+        Required arguments:
+        *graph*:
+            A networkx graph.
+        ----------
+        Returns:
+        *fmnt*:
+            A Formamentis Network of syntactic edges.
+        """
+        FormamentisNetwork = namedtuple("FormamentisNetwork", ["edges", "vertices"])
+
+        # Convert graph edges to list of tuples
+        edges = list(graph.edges())
+        # Convert graph vertices to list
+        vertices = list(graph.nodes())
+        # Create and return FormamentisNetwork namedtuple
+        return FormamentisNetwork(edges=edges, vertices=vertices)
+    
+    def formamentis_to_nxgraph(fmnt):
+        """
+        Converts a Formamentis Network to a NetworkX graph.
+
+        Required arguments:
+        *fmnt*:
+            A Formamentis Network.
+
+        Returns:
+        *graph*:
+            A NetworkX graph.
+        """
+        graph = nx.Graph()
+        # Add nodes from vertices
+        graph.add_nodes_from(fmnt.vertices)
+        # Add edges from edges
+        graph.add_edges_from(fmnt.edges)
+        return graph
