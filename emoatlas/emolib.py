@@ -20,6 +20,7 @@ import emoatlas.draw_plutchik as dp
 from emoatlas.baselines import _load_lookup_table, _make_baseline
 import emoatlas.draw_formamentis_force as dff
 import emoatlas.draw_formamentis_bundling as dfb
+import networkx as nx
 import itertools
 from collections import namedtuple
 import os
@@ -417,28 +418,6 @@ class EmoScores:
             FormamentisNetwork = namedtuple("FormamentisNetwork", "edges vertices")
             return FormamentisNetwork(final_edgelist, list(final_vertex))
 
-    def nxgraph_to_formamentis(graph):
-        """
-        Converts a networkx graph to a formamentis network object.
-        CONSIDERS ALL EDGES AS syntactic.
-
-        Required arguments:
-        *graph*:
-            A networkx graph.
-        ----------
-        Returns:
-        *fmnt*:
-            A Formamentis Network of syntactic edges.
-        """
-        FormamentisNetwork = namedtuple("FormamentisNetwork", ["edges", "vertices"])
-
-        # Convert graph edges to list of tuples
-        edges = list(graph.edges())
-        # Convert graph vertices to list
-        vertices = list(graph.nodes())
-        # Create and return FormamentisNetwork namedtuple
-        return FormamentisNetwork(edges=edges, vertices=vertices)
-
     def draw_statistically_significant_emotions(self, obj, title=None):
         """
         Computes how statistically significantly higher or lower is each emotion in the input text or Formamentis Network.
@@ -665,6 +644,10 @@ class EmoScores:
 
         return lemmatized
 
+    ######################################
+    # Utilities
+    ######################################
+
     def export_formamentis(self, fmnt, path=None, filename=None):
         """
         Export the edges of a Formamentis Network to a text file.
@@ -699,3 +682,45 @@ class EmoScores:
         with open(filepath, "w") as file:
             for pair in edges:
                 file.write(f"{pair[0]} , {pair[1]}\n")
+
+
+    def nxgraph_to_formamentis(graph):
+        """
+        Converts a networkx graph to a formamentis network object.
+        CONSIDERS ALL EDGES AS syntactic.
+
+        Required arguments:
+        *graph*:
+            A networkx graph.
+        ----------
+        Returns:
+        *fmnt*:
+            A Formamentis Network of syntactic edges.
+        """
+        FormamentisNetwork = namedtuple("FormamentisNetwork", ["edges", "vertices"])
+
+        # Convert graph edges to list of tuples
+        edges = list(graph.edges())
+        # Convert graph vertices to list
+        vertices = list(graph.nodes())
+        # Create and return FormamentisNetwork namedtuple
+        return FormamentisNetwork(edges=edges, vertices=vertices)
+    
+    def formamentis_to_nxgraph(fmnt):
+        """
+        Converts a Formamentis Network to a NetworkX graph.
+
+        Required arguments:
+        *fmnt*:
+            A Formamentis Network.
+
+        Returns:
+        *graph*:
+            A NetworkX graph.
+        """
+        graph = nx.Graph()
+        # Add nodes from vertices
+        graph.add_nodes_from(fmnt.vertices)
+        # Add edges from edges
+        graph.add_edges_from(fmnt.edges)
+        return graph
