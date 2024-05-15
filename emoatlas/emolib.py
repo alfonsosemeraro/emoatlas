@@ -650,7 +650,7 @@ class EmoScores:
 
     def export_formamentis(self, fmnt, path=None, filename=None):
         """
-        Export the edges of a Formamentis Network to a text file.
+        Export the edges of a Formamentis Network to a text file. Does not support multiplex.
 
         Parameters:
         -----------
@@ -682,6 +682,41 @@ class EmoScores:
         with open(filepath, "w") as file:
             for pair in edges:
                 file.write(f"{pair[0]} , {pair[1]}\n")
+
+    def import_formamentis(self, filepath=None):
+        """
+        Import the edges of a Formamentis Network from a text file. Does not support multiplex.
+
+        Parameters:
+        -----------
+        filepath : str, optional
+            The path of the file from which to import files.
+
+        Returns:
+        --------
+        fmnt : FormamentisNetwork
+            The Formamentis Network object.
+        """
+
+        FormamentisNetwork = namedtuple("FormamentisNetwork", ["edges", "vertices"])
+        edges = []
+        vertices = set()
+
+        # Read the file and process each line
+        with open(filepath, "r") as file:
+            for line in file:
+                # Split the line into two vertices
+                vertex1, vertex2 = map(str.strip, line.split(","))
+                # Add the edge to the edges list
+                edges.append((vertex1, vertex2))
+                # Add the vertices to the vertices set
+                vertices.update([vertex1, vertex2])
+
+        # Convert the vertices set to a sorted list
+        vertices = sorted(vertices)
+
+        # Create and return the FormamentisNetwork named tuple
+        return FormamentisNetwork(edges=edges, vertices=vertices)
 
     def nxgraph_to_formamentis(graph):
         """
