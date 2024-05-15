@@ -648,7 +648,7 @@ class EmoScores:
     # Utilities
     ######################################
 
-    def export_formamentis(self, fmnt, path=None, filename=None):
+    def export_formamentis(self, fmnt, path=os.getcwd(), filename=None):
         """
         Export the edges of a Formamentis Network to a text file. Does not support multiplex.
 
@@ -670,9 +670,6 @@ class EmoScores:
             filename = "extracted formamentis.txt"
         elif not filename.endswith(".txt"):
             filename += ".txt"
-
-        if path == None:
-            path = os.getcwd()
 
         # Combine path and filename to get the full file path
         filepath = os.path.join(path, filename)
