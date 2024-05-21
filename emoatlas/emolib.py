@@ -338,7 +338,7 @@ class EmoScores:
             raise ValueError("Alpha value for synonyms must be between 0.0 and 1.0")
 
         if layout == "force_layout":
-            dff.draw_formamentis_force_layout(
+            figure = dff.draw_formamentis_force_layout(
                 fmn.edges,
                 highlight=highlight,
                 language=self.language,
@@ -351,7 +351,7 @@ class EmoScores:
                 alpha_synonyms=alpha_synonyms,
             )
         elif layout == "edge_bundling":
-            dfb.draw_formamentis_circle_layout(
+            figure = dfb.draw_formamentis_circle_layout(
                 fmn,
                 highlight=highlight,
                 language=self.language,
@@ -363,6 +363,7 @@ class EmoScores:
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
             )
+        return figure
 
     def extract_word_from_formamentis(self, fmn, target_word):
         """
