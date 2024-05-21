@@ -291,6 +291,7 @@ class EmoScores:
         alpha_syntactic=0.5,
         alpha_hypernyms=0.5,
         alpha_synonyms=0.5,
+        save_path=None,
     ):
         """
         Represents a Formamentis Network in either a circular or force-based layout.
@@ -327,6 +328,10 @@ class EmoScores:
 
         *alpha_synonyms*:
             A numeric. Alpha value for synonyms edges, must be between 0.0 and 1.0
+
+        *save_path*:
+        A string representing the file path where the figure should be saved.
+        If None, the figure will only be plotted and not saved. Default is None.
         """
 
         # Check if alpha values are within the range [0.0, 1.0]
@@ -338,7 +343,7 @@ class EmoScores:
             raise ValueError("Alpha value for synonyms must be between 0.0 and 1.0")
 
         if layout == "force_layout":
-            figure = dff.draw_formamentis_force_layout(
+            dff.draw_formamentis_force_layout(
                 fmn.edges,
                 highlight=highlight,
                 language=self.language,
@@ -349,9 +354,10 @@ class EmoScores:
                 alpha_syntactic=alpha_syntactic,
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
+                save_path=save_path,
             )
         elif layout == "edge_bundling":
-            figure = dfb.draw_formamentis_circle_layout(
+            dfb.draw_formamentis_circle_layout(
                 fmn,
                 highlight=highlight,
                 language=self.language,
@@ -362,8 +368,8 @@ class EmoScores:
                 alpha_syntactic=alpha_syntactic,
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
+                save_path=save_path,
             )
-        return figure
 
     def extract_word_from_formamentis(self, fmn, target_word):
         """
