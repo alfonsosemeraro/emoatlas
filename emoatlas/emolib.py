@@ -13,6 +13,7 @@ from emoatlas.resources import (
 )
 
 from emoatlas.textloader import _load_object
+from collections import defaultdict
 import emoatlas.formamentis_edgelist as fme
 import emoatlas.emo_scores as es
 import emoatlas.baselines as bsl
@@ -725,7 +726,7 @@ class EmoScores:
         # Create and return the FormamentisNetwork named tuple
         return FormamentisNetwork(edges=edges, vertices=vertices)
 
-    def nxgraph_to_formamentis(graph):
+    def nxgraph_to_formamentis(self, graph):
         """
         Converts a networkx graph to a formamentis network object.
         CONSIDERS ALL EDGES AS syntactic.
@@ -748,7 +749,7 @@ class EmoScores:
         # Create and return FormamentisNetwork namedtuple
         return FormamentisNetwork(edges=edges, vertices=vertices)
 
-    def formamentis_to_nxgraph(fmnt):
+    def formamentis_to_nxgraph(self, fmnt):
         """
         Converts a Formamentis Network to a NetworkX graph.
 
@@ -767,3 +768,40 @@ class EmoScores:
         # Add edges from edges
         graph.add_edges_from(fmnt.edges)
         return graph
+
+    from collections import defaultdict
+
+    def combine_edgelists(self, edgelists):
+        """
+        Combine multiple edgelists into a single edgelist, summing the weights of any duplicate edges.
+        Parameters:
+        -----------
+        - edgelists (list): A list of edgelists to be combined. Supports FormamentisNetwork, NetworkX Graph and raw edgelists.
+        Returns:
+        -----------
+        - result (list): A list of tuples representing the combined edgelist, where each tuple contains the two nodes and the weight.
+        """
+        if type(edgelists) != list:
+            raise ValueError("The argument should be a list of formamentis networks.")
+
+        # Use a defaultdict to automatically initialize weights to 0
+        weighted_edges = defaultdict(int)
+        # Iterate through each edgelist
+        for edgelist in edgelists:
+            try:
+                edgelist_to_consider = list(edgelist.edges)
+            except:
+                try:
+                    edgelist_to_consider = edgelist["fmnt"]
+                except:
+                    edgelist_to_consider = edgelist
+            # Iterate through each edge in the current edgelist
+            for edge in edgelist_to_consider:
+                sorted_edge = tuple(sorted(edge[:2]))
+                weighted_edges[sorted_edge] += 1
+        # Convert the defaultdict to a list of tuples (node1, node2, weight)
+        result = [
+            (edgelist_to_consider[0], edgelist_to_consider[1], weight)
+            for edgelist_to_consider, weight in weighted_edges.items()
+        ]
+        return result
