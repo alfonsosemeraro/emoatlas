@@ -847,8 +847,17 @@ class EmoScores:
             return f"Node not found: {str(e)}"
 
     def plot_mindset_stream(self, network, start_node, end_node):
-        all_shortest_paths = self.find_all_shortest_paths(network, start_node, end_node)
+        """
+        Plot the mindset stream graph.
 
+        Parameters:
+        - graph (list): A raw edgelist, might include weights.
+        - start_node: The starting node for the shortest paths.
+        - end_node: The ending node for the shortest paths.
+
+        """
+
+        all_shortest_paths = self.find_all_shortest_paths(network, start_node, end_node)
         positive, negative, ambivalent = _valences("english")
         start_node = all_shortest_paths[0][0]
         end_node = all_shortest_paths[0][-1]
