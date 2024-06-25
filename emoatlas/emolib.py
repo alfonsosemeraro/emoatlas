@@ -856,7 +856,6 @@ class EmoScores:
         - end_node: The ending node for the shortest paths.
 
         """
-
         all_shortest_paths = self.find_all_shortest_paths(network, start_node, end_node)
         positive, negative, ambivalent = _valences("english")
         start_node = all_shortest_paths[0][0]
@@ -960,7 +959,7 @@ class EmoScores:
         # Create rounded rectangular backgrounds for node labels
         for node, (x, y) in pos.items():
             color = node_colors[list(G.nodes()).index(node)]
-            rect_width = 0.09 - base_size * 0.004
+            rect_width = 0.11 - base_size * 0.0035
             rect_height = base_size * 0.002
             scaled_font_size = 14 - base_size * 0.07
 
