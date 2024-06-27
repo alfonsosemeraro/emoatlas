@@ -952,7 +952,7 @@ class EmoScores:
         # Customize label backgrounds
         for node, label in labels.items():
             color = node_colors[list(G.nodes()).index(node)]
-            label.set_bbox(dict(facecolor=color, edgecolor='none', alpha=0.7, pad=1,boxstyle='round,pad=0.5'))
+            label.set_bbox(dict(facecolor=color, edgecolor='none', alpha=0.8, pad=1,boxstyle='round,pad=0.5'))
 
         plt.title("Mindset Stream", fontsize=16, fontweight='bold')
         plt.axis('off')
