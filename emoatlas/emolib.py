@@ -923,6 +923,8 @@ class EmoScores:
 
         # Draw edges with varying thickness and colors
         max_count = max(edge_counts.values())
+        min_width = 3  # Minimum edge width
+        max_width = 15  # Maximum edge width
         for edge, count in edge_counts.items():
             start, end = edge
             if start in positive and end in positive:
@@ -938,9 +940,11 @@ class EmoScores:
             else:
                 color = '#7f7f7f'  # Grey
 
-            nx.draw_networkx_edges(G, pos, edgelist=[edge], width=(count / max_count) * 16, 
-                                   alpha=0.5, edge_color=color)
+            # Calculate edge width with a minimum thickness
+            edge_width = min_width + (count / max_count) * (max_width - min_width)
 
+            nx.draw_networkx_edges(G, pos, edgelist=[edge], width=edge_width, 
+                                   alpha=0.5, edge_color=color)
         # Draw node labels with custom bbox
         scaled_font_size = 14 - base_size * 0.07
         labels = nx.draw_networkx_labels(G, pos, font_size=scaled_font_size, font_color='white')
@@ -948,7 +952,7 @@ class EmoScores:
         # Customize label backgrounds
         for node, label in labels.items():
             color = node_colors[list(G.nodes()).index(node)]
-            label.set_bbox(dict(facecolor=color, edgecolor='none', alpha=0.8, pad=1,boxstyle='round,pad=0.5'))
+            label.set_bbox(dict(facecolor=color, edgecolor='none', alpha=0.7, pad=1,boxstyle='round,pad=0.5'))
 
         plt.title("Mindset Stream", fontsize=16, fontweight='bold')
         plt.axis('off')
