@@ -858,55 +858,55 @@ class EmoScores:
 
         """
         if shortest_paths==None:
-            all_shortest_paths = self.find_all_shortest_paths(network, start_node, end_node)
+            shortest_paths = self.find_all_shortest_paths(network, start_node, end_node)
         positive, negative, ambivalent = _valences('english')
-        start_node = all_shortest_paths[0][0]
-        end_node = all_shortest_paths[0][-1]
+        start_node = shortest_paths[0][0]
+        end_node = shortest_paths[0][-1]
         G = nx.Graph()
-    
+
         # Count edge frequencies
         edge_counts = {}
-        for path in all_shortest_paths:
+        for path in shortest_paths:
             for i in range(len(path) - 1):
                 edge = tuple(sorted([path[i], path[i + 1]]))
                 edge_counts[edge] = edge_counts.get(edge, 0) + 1
-    
+
         # If the network is weighted, use the weights as edge counts
         if len(network[0]) == 3:
             for edge in network:
                 sorted_edge = tuple(sorted([edge[0], edge[1]]))
                 if sorted_edge in edge_counts:
                     edge_counts[sorted_edge] = edge[2]
-    
+
         # Add edges to the graph
         for edge, count in edge_counts.items():
             G.add_edge(edge[0], edge[1], weight=count)
-    
+
         # Create a layout with start_node on the left and end_node on the right
         pos = {}
-        nodes = set(node for path in all_shortest_paths for node in path)
+        nodes = set(node for path in shortest_paths for node in path)
         x_positions = {node: 0 for node in nodes}
         x_positions[start_node] = 0
         x_positions[end_node] = 1
-        for path in all_shortest_paths:
+        for path in shortest_paths:
             for i, node in enumerate(path[1:-1], 1):
                 x_positions[node] = max(x_positions[node], i / (len(path) - 1))
-    
+
         # Assign y-positions with more space
         y_positions = {}
         for x in set(x_positions.values()):
             nodes_at_x = [node for node, pos in x_positions.items() if pos == x]
             for i, node in enumerate(nodes_at_x):
                 y_positions[node] = (i - (len(nodes_at_x) - 1) / 2) * 0.2  # Increased spacing
-    
+
         # Set positions
         for node in nodes:
             pos[node] = (x_positions[node], y_positions[node])
-    
+
         # Adjust start and end node positions
         pos[start_node] = (0, 0)
         pos[end_node] = (1, 0)
-    
+
         # Determine node colors
         node_colors = []
         for node in G.nodes():
@@ -916,11 +916,11 @@ class EmoScores:
                 node_colors.append('#d62728')  # Red
             else:
                 node_colors.append('#7f7f7f')  # Grey
-    
+
         # Draw the graph
         base_size = len(G.nodes())
         plt.figure(figsize=(12, 8), dpi=300)
-    
+
         # Draw edges with varying thickness and colors
         max_count = max(edge_counts.values())
         for edge, count in edge_counts.items():
@@ -937,19 +937,19 @@ class EmoScores:
                 color = '#dc9f9e'  # Grayish red
             else:
                 color = '#7f7f7f'  # Grey
-            
+
             nx.draw_networkx_edges(G, pos, edgelist=[edge], width=(count / max_count) * 16, 
                                    alpha=0.5, edge_color=color)
-    
+
         # Draw node labels with custom bbox
         scaled_font_size = 14 - base_size * 0.07
         labels = nx.draw_networkx_labels(G, pos, font_size=scaled_font_size, font_color='white')
-    
+
         # Customize label backgrounds
         for node, label in labels.items():
             color = node_colors[list(G.nodes()).index(node)]
             label.set_bbox(dict(facecolor=color, edgecolor='none', alpha=0.8, pad=1,boxstyle='round,pad=0.5'))
-    
+
         plt.title("Mindset Stream", fontsize=16, fontweight='bold')
         plt.axis('off')
         plt.tight_layout()
