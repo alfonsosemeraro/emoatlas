@@ -923,8 +923,8 @@ class EmoScores:
 
         # Draw edges with varying thickness and colors
         max_count = max(edge_counts.values())
-        min_width = 3  # Minimum edge width
-        max_width = 15  # Maximum edge width
+        min_width = 1.5  # Minimum edge width
+        max_width = 16  # Maximum edge width
         for edge, count in edge_counts.items():
             start, end = edge
             if start in positive and end in positive:
