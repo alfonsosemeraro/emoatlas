@@ -961,11 +961,11 @@ class EmoScores:
         # Create rounded rectangular backgrounds for node labels
         for node, (x, y) in pos.items():
             color = node_colors[list(G.nodes()).index(node)]
-            rect_width = 0.11 - base_size * 0.0035
-            rect_height = base_size * 0.002
+            rect_width = 0.09 - base_size * 0.0035
+            rect_height = (base_size * 0.002) - 0.015
             scaled_font_size = 14 - base_size * 0.07
 
-            dynamic_pad = rect_height * 1.01 + base_size * 0.0005
+            dynamic_pad = (rect_height + 0.1 ) + base_size * 0.0005
 
             rect = patches.FancyBboxPatch(
                 (x - rect_width / 2, y - rect_height / 2),
