@@ -846,7 +846,7 @@ class EmoScores:
         except nx.NodeNotFound as e:
             return f"Node not found: {str(e)}"
 
-    def plot_mindset_stream(self, network, shortest_paths=None, start_node, end_node):
+    def plot_mindset_stream(self, network, start_node, end_node, shortest_paths=None):
         """
         Plot the mindset stream graph.
 
