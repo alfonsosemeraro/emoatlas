@@ -851,8 +851,39 @@ class EmoScores:
         except nx.NodeNotFound as e:
             return f"Node not found: {str(e)}"
 
+    def get_top_quantile_shortest_paths(
+        self, network, start_node, end_node, top_quantile=0.25
+    ):
+        """
+        Returns the top quantile of shortest paths between the start_node and end_node in the given network.
+
+        Parameters:
+            network (list): A raw edgelist.
+            start_node (string): The starting node of the paths.
+            end_node (string): The ending node of the paths.
+            top_quantile (float): The quantile of paths to keep. Defaults to 0.25.
+
+        Returns:
+            list: A list of paths (as lists of nodes) from the top quantile of the shortest paths.
+        """
+        all_paths = self.find_all_shortest_paths(network, start_node, end_node)
+
+        path_weights = []
+        for path in all_paths:
+            weight = self.calculate_path_weight(network, path)
+            path_weights.append((path, weight))
+
+        # Sort paths by weight in descending order
+        sorted_paths = sorted(path_weights, key=lambda x: x[1], reverse=True)
+
+        # Calculate the number of paths to keep
+        paths_to_keep = max(1, int(len(sorted_paths) * top_quantile))
+
+        # Return only the paths (not the weights) from the top quantile
+        return [path for path, _ in sorted_paths[:paths_to_keep]]
+
     def plot_mindset_stream(
-        self, graph, start_node, end_node, shortest_paths=None, quantile=1.0
+        self, graph, start_node, end_node, shortest_paths=None, top_quantile=None
     ):
         """
         Plot the mindset stream graph.
@@ -862,16 +893,23 @@ class EmoScores:
         - shortest_paths(list of lists): if None, it will compute all shortest paths between the 2 nodes.
         - start_node: The starting node for the shortest paths.
         - end_node: The ending node for the shortest paths.
-        - quantile: The quantile of shortest paths to keep. Default is 1.0.
-
+        - quantile (float): The top quantile of shortest paths to keep. Defaults to None. Requires a weighted edgelist.
         """
         if type(graph).__name__ == "FormamentisNetwork":
             graph = graph.edges
 
         if shortest_paths == None:
-            shortest_paths = self.get_top_quantile_shortest_paths(
-                graph, start_node, end_node, top_quantile=quantile
-            )
+            shortest_paths = self.find_all_shortest_paths(graph, start_node, end_node)
+        if top_quantile != None:
+            try:
+                shortest_paths = self.get_top_quantile_shortest_paths(
+                    graph, start_node, end_node, top_quantile=top_quantile
+                )
+            except:
+                raise ValueError(
+                    "If a quantile is set, weights should be necessary in the graph."
+                )
+
         positive, negative, ambivalent = _valences("english")
         start_node = shortest_paths[0][0]
         end_node = shortest_paths[0][-1]
@@ -991,54 +1029,23 @@ class EmoScores:
         plt.tight_layout()
         plt.show()
 
-        def calculate_path_weight(network, path):
-            """
-            Calculate the weight of a given path in the network.
+    def calculate_path_weight(self, network, path):
+        """
+        Calculate the weight of a given path in the network.
 
-            Parameters:
-            - network (list): A weighted edgelist.
-            - path (list): A list of nodes representing all paths.
+        Parameters:
+        - network (list): A weighted edgelist.
+        - path (list): A list of nodes representing all paths.
 
-            Returns:
-            - weight (float): The total weight of the path.
-            """
-            weight = 0
-            for i in range(len(path) - 1):
-                for edge in network:
-                    if (edge[0] == path[i] and edge[1] == path[i + 1]) or (
-                        edge[1] == path[i] and edge[0] == path[i + 1]
-                    ):
-                        weight += edge[2]
-                        break
-            return weight
-
-        def get_top_quantile_shortest_paths(
-            network, start_node, end_node, top_quantile=0.25
-        ):
-            """
-            Returns the top quantile of shortest paths between the start_node and end_node in the given network.
-
-            Parameters:
-                network (list): A raw edgelist.
-                start_node (string): The starting node of the paths.
-                end_node (string): The ending node of the paths.
-                top_quantile (float): The quantile of paths to keep. Defaults to 0.25.
-
-            Returns:
-                list: A list of paths (as lists of nodes) from the top quantile of the shortest paths.
-            """
-            all_paths = self.find_all_shortest_paths(network, start_node, end_node)
-
-            path_weights = []
-            for path in all_paths:
-                weight = self.calculate_path_weight(network, path)
-                path_weights.append((path, weight))
-
-            # Sort paths by weight in descending order
-            sorted_paths = sorted(path_weights, key=lambda x: x[1], reverse=True)
-
-            # Calculate the number of paths to keep
-            paths_to_keep = max(1, int(len(sorted_paths) * top_quantile))
-
-            # Return only the paths (not the weights) from the top quantile
-            return [path for path, _ in sorted_paths[:paths_to_keep]]
+        Returns:
+        - weight (float): The total weight of the path.
+        """
+        weight = 0
+        for i in range(len(path) - 1):
+            for edge in network:
+                if (edge[0] == path[i] and edge[1] == path[i + 1]) or (
+                    edge[1] == path[i] and edge[0] == path[i + 1]
+                ):
+                    weight += edge[2]
+                    break
+        return weight
