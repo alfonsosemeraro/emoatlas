@@ -785,7 +785,9 @@ class EmoScores:
         - result (list): A list of tuples representing the combined edgelist, where each tuple contains the two nodes and the weight.
         """
         if type(edgelists) != list:
-            raise ValueError("The argument should be a list of formamentis networks.")
+            raise ValueError(
+                "The argument should be a list of multiple formamentis networks."
+            )
 
         # Use a defaultdict to automatically initialize weights to 0
         weighted_edges = defaultdict(int)
@@ -846,20 +848,23 @@ class EmoScores:
         except nx.NodeNotFound as e:
             return f"Node not found: {str(e)}"
 
-    def plot_mindset_stream(self, network, start_node, end_node, shortest_paths=None):
+    def plot_mindset_stream(self, graph, start_node, end_node, shortest_paths=None):
         """
         Plot the mindset stream graph.
 
         Parameters:
-        - graph (list): A raw edgelist, might include weights.
+        - graph (list): A raw edgelist or a FormamentisNetwork, might include weights.
         - shortest_paths(list of lists): if None, it will compute all shortest paths between the 2 nodes.
         - start_node: The starting node for the shortest paths.
         - end_node: The ending node for the shortest paths.
 
         """
-        if shortest_paths==None:
+        if type(graph).__name__ == "FormamentisNetwork":
+            graph = graph.edges
+
+        if shortest_paths == None:
             shortest_paths = self.find_all_shortest_paths(network, start_node, end_node)
-        positive, negative, ambivalent = _valences('english')
+        positive, negative, ambivalent = _valences("english")
         start_node = shortest_paths[0][0]
         end_node = shortest_paths[0][-1]
         G = nx.Graph()
@@ -872,8 +877,8 @@ class EmoScores:
                 edge_counts[edge] = edge_counts.get(edge, 0) + 1
 
         # If the network is weighted, use the weights as edge counts
-        if len(network[0]) == 3:
-            for edge in network:
+        if len(graph[0]) == 3:
+            for edge in graph:
                 sorted_edge = tuple(sorted([edge[0], edge[1]]))
                 if sorted_edge in edge_counts:
                     edge_counts[sorted_edge] = edge[2]
@@ -897,7 +902,9 @@ class EmoScores:
         for x in set(x_positions.values()):
             nodes_at_x = [node for node, pos in x_positions.items() if pos == x]
             for i, node in enumerate(nodes_at_x):
-                y_positions[node] = (i - (len(nodes_at_x) - 1) / 2) * 0.2  # Increased spacing
+                y_positions[node] = (
+                    i - (len(nodes_at_x) - 1) / 2
+                ) * 0.2  # Increased spacing
 
         # Set positions
         for node in nodes:
@@ -911,11 +918,11 @@ class EmoScores:
         node_colors = []
         for node in G.nodes():
             if node in positive:
-                node_colors.append('#1f77b4')  # Blue
+                node_colors.append("#1f77b4")  # Blue
             elif node in negative:
-                node_colors.append('#d62728')  # Red
+                node_colors.append("#d62728")  # Red
             else:
-                node_colors.append('#7f7f7f')  # Grey
+                node_colors.append("#7f7f7f")  # Grey
 
         # Draw the graph
         base_size = len(G.nodes())
@@ -928,33 +935,50 @@ class EmoScores:
         for edge, count in edge_counts.items():
             start, end = edge
             if start in positive and end in positive:
-                color = '#1f77b4'  # Blue
+                color = "#1f77b4"  # Blue
             elif start in negative and end in negative:
-                color = '#d62728'  # Red
-            elif (start in positive and end in negative) or (start in negative and end in positive):
-                color = '#9467bd'  # Purple
-            elif (start in positive and end not in negative) or (end in positive and start not in negative):
-                color = '#b4cad6'  # Grayish blue
-            elif (start in negative and end not in negative) or (end in negative and start not in positive):
-                color = '#dc9f9e'  # Grayish red
+                color = "#d62728"  # Red
+            elif (start in positive and end in negative) or (
+                start in negative and end in positive
+            ):
+                color = "#9467bd"  # Purple
+            elif (start in positive and end not in negative) or (
+                end in positive and start not in negative
+            ):
+                color = "#b4cad6"  # Grayish blue
+            elif (start in negative and end not in negative) or (
+                end in negative and start not in positive
+            ):
+                color = "#dc9f9e"  # Grayish red
             else:
-                color = '#7f7f7f'  # Grey
+                color = "#7f7f7f"  # Grey
 
             # Calculate edge width with a minimum thickness
             edge_width = min_width + (count / max_count) * (max_width - min_width)
 
-            nx.draw_networkx_edges(G, pos, edgelist=[edge], width=edge_width, 
-                                   alpha=0.5, edge_color=color)
+            nx.draw_networkx_edges(
+                G, pos, edgelist=[edge], width=edge_width, alpha=0.5, edge_color=color
+            )
         # Draw node labels with custom bbox
         scaled_font_size = 14 - base_size * 0.07
-        labels = nx.draw_networkx_labels(G, pos, font_size=scaled_font_size, font_color='white')
+        labels = nx.draw_networkx_labels(
+            G, pos, font_size=scaled_font_size, font_color="white"
+        )
 
         # Customize label backgrounds
         for node, label in labels.items():
             color = node_colors[list(G.nodes()).index(node)]
-            label.set_bbox(dict(facecolor=color, edgecolor='none', alpha=0.8, pad=1,boxstyle='round,pad=0.5'))
+            label.set_bbox(
+                dict(
+                    facecolor=color,
+                    edgecolor="none",
+                    alpha=0.8,
+                    pad=1,
+                    boxstyle="round,pad=0.5",
+                )
+            )
 
-        plt.title("Mindset Stream", fontsize=16, fontweight='bold')
-        plt.axis('off')
+        plt.title("Mindset Stream", fontsize=16, fontweight="bold")
+        plt.axis("off")
         plt.tight_layout()
         plt.show()
