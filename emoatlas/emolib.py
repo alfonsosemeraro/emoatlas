@@ -900,6 +900,8 @@ class EmoScores:
         - start_node: The starting node for the shortest paths.
         - end_node: The ending node for the shortest paths.
         - quantile (float): The top quantile of shortest paths to keep. Defaults to None. Requires a weighted edgelist.
+        - figsize (tuple): Figure size for the plot. Defaults to (12, 8).
+
         """
         if type(graph).__name__ == "FormamentisNetwork":
             graph = graph.edges
@@ -983,8 +985,12 @@ class EmoScores:
 
         # Draw edges with varying thickness and colors
         max_count = max(edge_counts.values())
-        min_width = 1.5  # Minimum edge width
-        max_width = 16  # Maximum edge width
+        min_width = (
+            1.5 if is_weighted else 2
+        )  # Reduced minimum edge width for unweighted networks
+        max_width = (
+            16 if is_weighted else 2
+        )  # Reduced maximum edge width for unweighted networks
         for edge, count in edge_counts.items():
             start, end = edge
             if start in positive and end in positive:
@@ -1013,7 +1019,14 @@ class EmoScores:
                 G, pos, edgelist=[edge], width=edge_width, alpha=0.5, edge_color=color
             )
         # Draw node labels with custom bbox
-        scaled_font_size = 14 - base_size * 0.07
+        # Calculate label size
+        width, height = figsize
+        reference_width = 12  # Reference width for (12, 8) figure
+        base_font_size = 14 - base_size * 0.07  # Original calculation
+        scaled_font_size = base_font_size * (
+            width / reference_width
+        )  # Scale based on width ratio
+
         labels = nx.draw_networkx_labels(
             G, pos, font_size=scaled_font_size, font_color="white"
         )
