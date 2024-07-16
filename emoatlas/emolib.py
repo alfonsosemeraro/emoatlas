@@ -985,11 +985,11 @@ class EmoScores:
 
         # Draw edges with varying thickness and colors
         max_count = max(edge_counts.values())
-        min_width = (
-            1.5 if is_weighted else 2
+        min_width = (1.5 if is_weighted else 3) * (
+            figsize[0] / 12
         )  # Reduced minimum edge width for unweighted networks
-        max_width = (
-            16 if is_weighted else 2
+        max_width = (16 if is_weighted else 3) * (
+            figsize[0] / 12
         )  # Reduced maximum edge width for unweighted networks
         for edge, count in edge_counts.items():
             start, end = edge
