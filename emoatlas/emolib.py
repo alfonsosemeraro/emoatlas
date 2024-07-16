@@ -883,7 +883,13 @@ class EmoScores:
         return [path for path, _ in sorted_paths[:paths_to_keep]]
 
     def plot_mindset_stream(
-        self, graph, start_node, end_node, shortest_paths=None, top_quantile=None
+        self,
+        graph,
+        start_node,
+        end_node,
+        shortest_paths=None,
+        top_quantile=None,
+        figsize=(12, 8),
     ):
         """
         Plot the mindset stream graph.
@@ -900,7 +906,7 @@ class EmoScores:
 
         if shortest_paths == None:
             shortest_paths = self.find_all_shortest_paths(graph, start_node, end_node)
-        if top_quantile != None:
+        if top_quantile != None and shortest_paths == None:
             try:
                 shortest_paths = self.get_top_quantile_shortest_paths(
                     graph, start_node, end_node, top_quantile=top_quantile
@@ -910,7 +916,7 @@ class EmoScores:
                     "If a quantile is set, weights should be necessary in the graph."
                 )
 
-        positive, negative, ambivalent = _valences("english")
+        positive, negative, ambivalent = _valences(self.language)
         start_node = shortest_paths[0][0]
         end_node = shortest_paths[0][-1]
         G = nx.Graph()
@@ -923,11 +929,12 @@ class EmoScores:
                 edge_counts[edge] = edge_counts.get(edge, 0) + 1
 
         # If the network is weighted, use the weights as edge counts
-        if len(graph[0]) == 3:
-            for edge in graph:
-                sorted_edge = tuple(sorted([edge[0], edge[1]]))
-                if sorted_edge in edge_counts:
-                    edge_counts[sorted_edge] = edge[2]
+        # If not weighted, all weights will be 1
+        is_weighted = len(graph[0]) == 3
+        for edge in graph:
+            sorted_edge = tuple(sorted([edge[0], edge[1]]))
+            if sorted_edge in edge_counts:
+                edge_counts[sorted_edge] = edge[2] if is_weighted else 1
 
         # Add edges to the graph
         for edge, count in edge_counts.items():
@@ -972,7 +979,7 @@ class EmoScores:
 
         # Draw the graph
         base_size = len(G.nodes())
-        plt.figure(figsize=(12, 8), dpi=300)
+        plt.figure(figsize=figsize, dpi=300)
 
         # Draw edges with varying thickness and colors
         max_count = max(edge_counts.values())
