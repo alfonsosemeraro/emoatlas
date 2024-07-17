@@ -375,6 +375,104 @@ class EmoScores:
                 save_path=save_path,
             )
 
+    def draw_formamentis_custom_valences(
+        self,
+        fmn,
+        layout="edge_bundling",
+        highlight=[],
+        thickness=1,
+        ax=None,
+        hide_label=False,
+        translated=False,
+        alpha_syntactic=0.5,
+        alpha_hypernyms=0.5,
+        alpha_synonyms=0.5,
+        save_path=None,
+        valences=None,
+    ):
+        """
+        Represents a Formamentis Network in either a circular or force-based layout. This function allows to visualize the valences of the words in the network.
+        Does not support Forcelayout.
+
+        Required arguments:
+        ----------
+
+        *fmn*:
+            A Formamentis Network to visualize.
+
+        *layout*:
+            A str. Either "edge_bundling" for circular layout or "force_layout" for force-based layout.
+
+        *highlight*:
+            A list of the words to highlight in the network.
+
+        *thickness*:
+            A numeric. How thick must lines be drawn. Default is 1.
+
+        *ax*:
+            A matplotlib axes to draw the network on. If none is provided, a new one will be created.
+
+        *hide_label*:
+            A boolean value. If True, labels of words will not be visible.
+
+        *translated*:
+            A boolean value. True for english-translated nodes, False for original node labels. Default is False.
+
+        *alpha_syntactic*:
+            A numeric. Alpha value for syntactic edges, must be between 0.0 and 1.0
+
+        *alpha_hypernyms*:
+            A numeric. Alpha value for hypernyms edges, must be between 0.0 and 1.0
+
+        *alpha_synonyms*:
+            A numeric. Alpha value for synonyms edges, must be between 0.0 and 1.0
+
+        *Valences*:
+            A tuple of 3 sets, representing the positive, negative and neutral valences of the words in the network.
+
+        *save_path*:
+        A string representing the file path where the figure should be saved.
+        If None, the figure will only be plotted and not saved. Default is None.
+        """
+
+        # Check if alpha values are within the range [0.0, 1.0]
+        if not (0.0 <= alpha_syntactic <= 1.0):
+            raise ValueError("Alpha value for syntactic must be between 0.0 and 1.0")
+        if not (0.0 <= alpha_hypernyms <= 1.0):
+            raise ValueError("Alpha value for hypernyms must be between 0.0 and 1.0")
+        if not (0.0 <= alpha_synonyms <= 1.0):
+            raise ValueError("Alpha value for synonyms must be between 0.0 and 1.0")
+
+        if layout == "force_layout":
+            dff.draw_formamentis_force_layout(
+                fmn.edges,
+                highlight=highlight,
+                language=self.language,
+                thickness=thickness,
+                ax=ax,
+                hide_label=hide_label,
+                translated=translated,
+                alpha_syntactic=alpha_syntactic,
+                alpha_hypernyms=alpha_hypernyms,
+                alpha_synonyms=alpha_synonyms,
+                save_path=save_path,
+            )
+        elif layout == "edge_bundling":
+            dfb.draw_formamentis_circle_layout(
+                fmn,
+                highlight=highlight,
+                language=self.language,
+                thickness=thickness,
+                ax=ax,
+                hide_label=hide_label,
+                translated=translated,
+                alpha_syntactic=alpha_syntactic,
+                alpha_hypernyms=alpha_hypernyms,
+                alpha_synonyms=alpha_synonyms,
+                save_path=save_path,
+                valences=valences,
+            )
+
     def extract_word_from_formamentis(self, fmn, target_word):
         """
         Extract the semantic frame of a single word from a formamentis network.
