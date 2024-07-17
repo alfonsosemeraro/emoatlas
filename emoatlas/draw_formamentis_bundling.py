@@ -163,13 +163,13 @@ def draw_formamentis_circle_layout(
     if valences == None:
         _positive, _negative, _ambivalent = _valences(language)
     elif len(valences) == 3:
+        print("test1")
         if type(valences[0]) != set:
-            try:
-                valences = [set(valences[0]), set(valences[1]), set(valences[2])]
-            except:
-                raise ValueError("Valences must be a list of three sets of words")
+            valences = [set(valences[0]), set(valences[1]), set(valences[2])]
+        print("test2")
         _positive, _negative, _ambivalent = valences
     else:
+        print("test3")
         raise ValueError("Valences must be a list of three sets of words")
 
     print(_positive, _negative, _ambivalent)
