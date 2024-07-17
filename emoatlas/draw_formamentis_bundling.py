@@ -145,7 +145,7 @@ def draw_formamentis_circle_layout(
     alpha_hypernyms=0.5,
     alpha_synonyms=0.5,
     save_path=None,
-    valences=None,
+    Valences=None,
 ):
     """ """
 
