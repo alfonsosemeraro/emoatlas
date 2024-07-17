@@ -373,7 +373,7 @@ class EmoScores:
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
                 save_path=save_path,
-                valences=None,
+                Valences=None,
             )
 
     def draw_formamentis_custom_valences(
