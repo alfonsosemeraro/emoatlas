@@ -145,7 +145,6 @@ def draw_formamentis_circle_layout(
     alpha_hypernyms=0.5,
     alpha_synonyms=0.5,
     save_path=None,
-    Valences=None,
 ):
     """ """
 
@@ -160,14 +159,7 @@ def draw_formamentis_circle_layout(
     }  # (196/256, 128/256, 153/256)}
 
     # Get positive or negative valences
-    if Valences != None:
-        _positive, _negative, _ambivalent = _valences(language)
-    elif len(Valences) == 3:
-        if type(Valences[0]) != set:
-            raise ValueError("Valences must be a list of three sets of words")
-        _positive, _negative, _ambivalent = Valences
-    else:
-        raise ValueError("Valences must be a list of three sets of words")
+    _positive, _negative, _ambivalent = _valences(language)
 
     if not ax:
         _, ax = plt.subplots(figsize=(16, 16))
