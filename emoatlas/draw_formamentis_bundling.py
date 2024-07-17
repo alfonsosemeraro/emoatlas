@@ -160,7 +160,7 @@ def draw_formamentis_circle_layout(
     }  # (196/256, 128/256, 153/256)}
 
     # Get positive or negative valences
-    if valences == None:
+    if valences != None:
         _positive, _negative, _ambivalent = _valences(language)
     elif len(valences) == 3:
         if type(valences[0]) != set:
