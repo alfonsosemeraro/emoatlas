@@ -172,9 +172,6 @@ def draw_formamentis_circle_layout(
     else:
         raise ValueError("Valences must be a list of three sets of words")
 
-    print(_positive, _negative, _ambivalent)
-    print(type(_positive), type(_negative), type(_ambivalent))
-
     if not ax:
         _, ax = plt.subplots(figsize=(16, 16))
 
