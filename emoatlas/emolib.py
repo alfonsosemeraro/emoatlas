@@ -379,6 +379,7 @@ class EmoScores:
     def draw_formamentis_custom_valences(
         self,
         fmn,
+        valences=None,
         layout="edge_bundling",
         highlight=[],
         thickness=1,
@@ -389,7 +390,6 @@ class EmoScores:
         alpha_hypernyms=0.5,
         alpha_synonyms=0.5,
         save_path=None,
-        valences=None,
     ):
         """
         Represents a Formamentis Network in either a circular or force-based layout. This function allows to visualize the valences of the words in the network.

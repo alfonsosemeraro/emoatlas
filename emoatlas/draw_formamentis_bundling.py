@@ -135,6 +135,7 @@ def _hex_to_rgb(value):
 
 def draw_formamentis_circle_layout(
     fmn,
+    valences=None,
     highlight=[],
     language="english",
     thickness=15,
@@ -145,7 +146,6 @@ def draw_formamentis_circle_layout(
     alpha_hypernyms=0.5,
     alpha_synonyms=0.5,
     save_path=None,
-    valences=None,
 ):
     """ """
 
