@@ -1016,13 +1016,13 @@ class EmoScores:
             edge_width = min_width + (count / max_count) * (max_width - min_width)
 
             nx.draw_networkx_edges(
-                G, pos, edgelist=[edge], width=edge_width, alpha=0.5, edge_color=color
+                G, pos, edgelist=[edge], width=edge_width, alpha=0.45, edge_color=color
             )
         # Draw node labels with custom bbox
         # Calculate label size
         width, height = figsize
         reference_width = 12  # Reference width for (12, 8) figure
-        base_font_size = 14 - base_size * 0.07  # Original calculation
+        base_font_size = 10 - base_size * 0.07  # Original calculation
         scaled_font_size = base_font_size * (
             width / reference_width
         )  # Scale based on width ratio
@@ -1038,8 +1038,8 @@ class EmoScores:
                 dict(
                     facecolor=color,
                     edgecolor="none",
-                    alpha=0.8,
-                    pad=1,
+                    alpha=0.7,
+                    pad=0.5,
                     boxstyle="round,pad=0.5",
                 )
             )
