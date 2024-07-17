@@ -890,6 +890,7 @@ class EmoScores:
         shortest_paths=None,
         top_quantile=None,
         figsize=(12, 8),
+        title=" ",
     ):
         """
         Plot the mindset stream graph.
@@ -1044,7 +1045,7 @@ class EmoScores:
                 )
             )
 
-        plt.title("Mindset Stream", fontsize=16, fontweight="bold")
+        plt.title(title, fontsize=16, fontweight="bold")
         plt.axis("off")
         plt.tight_layout()
         plt.show()
