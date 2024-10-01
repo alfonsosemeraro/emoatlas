@@ -773,7 +773,7 @@ class EmoScores:
 
     from collections import defaultdict
 
-    def combine_formamentis(edgelists, weights=False):
+    def combine_formamentis(self, edgelists, weights=False):
         """
         Combine multiple formamentis networks into a single formamentis network, summing the weights of any duplicate edges if specified.
 
