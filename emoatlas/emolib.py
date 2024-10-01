@@ -13,7 +13,7 @@ from emoatlas.resources import (
 )
 
 from emoatlas.textloader import _load_object
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 import emoatlas.formamentis_edgelist as fme
 import emoatlas.emo_scores as es
 import emoatlas.baselines as bsl
@@ -26,7 +26,6 @@ from matplotlib import patches
 from emoatlas.resources import _valences
 import networkx as nx
 import itertools
-from collections import namedtuple
 import os
 
 
@@ -774,23 +773,32 @@ class EmoScores:
 
     from collections import defaultdict
 
-    def combine_edgelists(self, edgelists):
+    def combine_formamentis(edgelists, weights=False):
         """
-        Combine multiple edgelists into a single edgelist, summing the weights of any duplicate edges.
+        Combine multiple formamentis networks into a single formamentis network, summing the weights of any duplicate edges if specified.
+
         Parameters:
         -----------
-        - edgelists (list): A list of edgelists to be combined. Supports FormamentisNetwork, NetworkX Graph and raw edgelists.
+        - edgelists (list): A list of edgelists to be combined. Supports FormamentisNetwork, NetworkX Graph, and raw edgelists.
+        - weights (bool): If True, includes the weights of the edges. If False, edges are treated as unweighted.
+
         Returns:
         -----------
-        - result (list): A list of tuples representing the combined edgelist, where each tuple contains the two nodes and the weight.
+        - FormamentisNetwork: A namedtuple containing 'edges' (a list of combined edges) and 'vertices' (a set of unique nodes).
+        OR
+        - Weighted Edgelist (list): A list of tuples representing the combined edgelist, where each tuple contains the two nodes and the weight.
         """
         if type(edgelists) != list:
             raise ValueError(
                 "The argument should be a list of multiple formamentis networks."
             )
 
-        # Use a defaultdict to automatically initialize weights to 0
+        FormamentisNetwork = namedtuple("FormamentisNetwork", ["edges", "vertices"])
+
+        # Use a defaultdict to automatically initialize weights to 0 if needed
         weighted_edges = defaultdict(int)
+        vertices = set()
+
         # Iterate through each edgelist
         for edgelist in edgelists:
             try:
@@ -800,16 +808,26 @@ class EmoScores:
                     edgelist_to_consider = edgelist["fmnt"]
                 except:
                     edgelist_to_consider = edgelist
+
             # Iterate through each edge in the current edgelist
             for edge in edgelist_to_consider:
-                sorted_edge = tuple(sorted(edge[:2]))
-                weighted_edges[sorted_edge] += 1
-        # Convert the defaultdict to a list of tuples (node1, node2, weight)
-        result = [
-            (edgelist_to_consider[0], edgelist_to_consider[1], weight)
-            for edgelist_to_consider, weight in weighted_edges.items()
+                node1, node2 = edge[:2]
+                sorted_edge = tuple(sorted((node1, node2)))
+                vertices.update(sorted_edge)  # Add nodes to vertices set
+                if weights and len(edge) == 3:  # If weights are provided and required
+                    weighted_edges[sorted_edge] += edge[2]
+                else:  # Treat as unweighted
+                    weighted_edges[sorted_edge] += 1
+
+        # Convert the defaultdict to a list of edges, optionally including weights
+        edges = [
+            (node1, node2, weight) if weights else (node1, node2)
+            for (node1, node2), weight in weighted_edges.items()
         ]
-        return result
+
+        if weights:
+            return edges
+        return FormamentisNetwork(edges=edges, vertices=list(vertices))
 
     def find_all_shortest_paths(self, graph, start_node, end_node):
         """
