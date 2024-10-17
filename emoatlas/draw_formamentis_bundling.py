@@ -144,6 +144,7 @@ def draw_formamentis_circle_layout(
     alpha_syntactic=0.5,
     alpha_hypernyms=0.5,
     alpha_synonyms=0.5,
+    save_path=None,
 ):
     """ """
 
@@ -375,4 +376,9 @@ def draw_formamentis_circle_layout(
     plt.ylim((-1.5, 1.5))
 
     ax.axis("off")
+
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
     return ax

@@ -132,6 +132,7 @@ def draw_formamentis_force_layout(
     alpha_syntactic=0.5,
     alpha_hypernyms=0.5,
     alpha_synonyms=0.5,
+    save_path=None,
 ):
     """ """
 
@@ -544,5 +545,10 @@ def draw_formamentis_force_layout(
                     )
 
     ax.axis("off")
+
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
 
     return ax

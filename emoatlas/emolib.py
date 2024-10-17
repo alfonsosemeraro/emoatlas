@@ -13,6 +13,7 @@ from emoatlas.resources import (
 )
 
 from emoatlas.textloader import _load_object
+from collections import defaultdict, namedtuple
 import emoatlas.formamentis_edgelist as fme
 import emoatlas.emo_scores as es
 import emoatlas.baselines as bsl
@@ -20,9 +21,11 @@ import emoatlas.draw_plutchik as dp
 from emoatlas.baselines import _load_lookup_table, _make_baseline
 import emoatlas.draw_formamentis_force as dff
 import emoatlas.draw_formamentis_bundling as dfb
+import matplotlib.pyplot as plt
+from matplotlib import patches
+from emoatlas.resources import _valences
 import networkx as nx
 import itertools
-from collections import namedtuple
 import os
 
 
@@ -291,6 +294,7 @@ class EmoScores:
         alpha_syntactic=0.5,
         alpha_hypernyms=0.5,
         alpha_synonyms=0.5,
+        save_path=None,
     ):
         """
         Represents a Formamentis Network in either a circular or force-based layout.
@@ -327,6 +331,10 @@ class EmoScores:
 
         *alpha_synonyms*:
             A numeric. Alpha value for synonyms edges, must be between 0.0 and 1.0
+
+        *save_path*:
+        A string representing the file path where the figure should be saved.
+        If None, the figure will only be plotted and not saved. Default is None.
         """
 
         # Check if alpha values are within the range [0.0, 1.0]
@@ -349,6 +357,7 @@ class EmoScores:
                 alpha_syntactic=alpha_syntactic,
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
+                save_path=save_path,
             )
         elif layout == "edge_bundling":
             dfb.draw_formamentis_circle_layout(
@@ -362,6 +371,7 @@ class EmoScores:
                 alpha_syntactic=alpha_syntactic,
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
+                save_path=save_path,
             )
 
     def extract_word_from_formamentis(self, fmn, target_word):
@@ -718,7 +728,7 @@ class EmoScores:
         # Create and return the FormamentisNetwork named tuple
         return FormamentisNetwork(edges=edges, vertices=vertices)
 
-    def nxgraph_to_formamentis(graph):
+    def nxgraph_to_formamentis(self, graph):
         """
         Converts a networkx graph to a formamentis network object.
         CONSIDERS ALL EDGES AS syntactic.
@@ -741,7 +751,7 @@ class EmoScores:
         # Create and return FormamentisNetwork namedtuple
         return FormamentisNetwork(edges=edges, vertices=vertices)
 
-    def formamentis_to_nxgraph(fmnt):
+    def formamentis_to_nxgraph(self, fmnt):
         """
         Converts a Formamentis Network to a NetworkX graph.
 
@@ -760,3 +770,321 @@ class EmoScores:
         # Add edges from edges
         graph.add_edges_from(fmnt.edges)
         return graph
+
+    from collections import defaultdict
+
+    def combine_formamentis(self, edgelists, weights=False):
+        """
+        Combine multiple formamentis networks into a single formamentis network, summing the weights of any duplicate edges if specified.
+
+        Parameters:
+        -----------
+        - edgelists (list): A list of edgelists to be combined. Supports FormamentisNetwork, NetworkX Graph, and raw edgelists.
+        - weights (bool): If True, includes the weights of the edges. If False, edges are treated as unweighted.
+
+        Returns:
+        -----------
+        - FormamentisNetwork: A namedtuple containing 'edges' (a list of combined edges) and 'vertices' (a set of unique nodes).
+        OR
+        - Weighted Edgelist (list): A list of tuples representing the combined edgelist, where each tuple contains the two nodes and the weight.
+        """
+        if type(edgelists) != list:
+            raise ValueError(
+                "The argument should be a list of multiple formamentis networks."
+            )
+
+        FormamentisNetwork = namedtuple("FormamentisNetwork", ["edges", "vertices"])
+
+        # Use a defaultdict to automatically initialize weights to 0 if needed
+        weighted_edges = defaultdict(int)
+        vertices = set()
+
+        # Iterate through each edgelist
+        for edgelist in edgelists:
+            try:
+                edgelist_to_consider = list(edgelist.edges)
+            except:
+                try:
+                    edgelist_to_consider = edgelist["fmnt"]
+                except:
+                    edgelist_to_consider = edgelist
+
+            # Iterate through each edge in the current edgelist
+            for edge in edgelist_to_consider:
+                node1, node2 = edge[:2]
+                sorted_edge = tuple(sorted((node1, node2)))
+                vertices.update(sorted_edge)  # Add nodes to vertices set
+                if weights and len(edge) == 3:  # If weights are provided and required
+                    weighted_edges[sorted_edge] += edge[2]
+                else:  # Treat as unweighted
+                    weighted_edges[sorted_edge] += 1
+
+        # Convert the defaultdict to a list of edges, optionally including weights
+        edges = [
+            (node1, node2, weight) if weights else (node1, node2)
+            for (node1, node2), weight in weighted_edges.items()
+        ]
+
+        if weights:
+            return edges
+        return FormamentisNetwork(edges=edges, vertices=list(vertices))
+
+    def find_all_shortest_paths(self, graph, start_node, end_node):
+        """
+        Find all shortest paths between start_node and end_node in a graph.
+
+        Parameters:
+        -----------
+        - graph (list): A raw edgelist, might include weights.
+        - start_node: The starting node for the shortest paths.
+        - end_node: The ending node for the shortest paths.
+
+        Returns:
+        -----------
+        - result (list): A list of lists that represent all the shortest paths between the nodes.
+        """
+
+        if type(graph).__name__ == "FormamentisNetwork":
+            graph = graph.edges
+
+        G = nx.Graph()
+
+        for edge in graph:
+            # If the edge has 2 elements, it's unweighted
+            # If it has 3 elements, the third is the weight, which we ignore
+            u, v = edge[:2]
+            G.add_edge(u, v)
+
+        try:
+            # Find all shortest paths between start_node and end_node
+            all_shortest_paths = list(nx.all_shortest_paths(G, start_node, end_node))
+
+            if not all_shortest_paths:
+                return f"No path found between {start_node} and {end_node}"
+
+            return all_shortest_paths
+
+        except nx.NetworkXNoPath:
+            return f"No path exists between {start_node} and {end_node}"
+        except nx.NodeNotFound as e:
+            return f"Node not found: {str(e)}"
+
+    def get_top_quantile_shortest_paths(
+        self, network, start_node, end_node, top_quantile=0.25
+    ):
+        """
+        Returns the top quantile of shortest paths between the start_node and end_node in the given network.
+
+        Parameters:
+            network (list): A raw edgelist.
+            start_node (string): The starting node of the paths.
+            end_node (string): The ending node of the paths.
+            top_quantile (float): The quantile of paths to keep. Defaults to 0.25.
+
+        Returns:
+            list: A list of paths (as lists of nodes) from the top quantile of the shortest paths.
+        """
+        all_paths = self.find_all_shortest_paths(network, start_node, end_node)
+
+        path_weights = []
+        for path in all_paths:
+            weight = self.calculate_path_weight(network, path)
+            path_weights.append((path, weight))
+
+        # Sort paths by weight in descending order
+        sorted_paths = sorted(path_weights, key=lambda x: x[1], reverse=True)
+
+        # Calculate the number of paths to keep
+        paths_to_keep = max(1, int(len(sorted_paths) * top_quantile))
+
+        # Return only the paths (not the weights) from the top quantile
+        return [path for path, _ in sorted_paths[:paths_to_keep]]
+
+    def plot_mindset_stream(
+        self,
+        graph,
+        start_node,
+        end_node,
+        shortest_paths=None,
+        top_quantile=None,
+        figsize=(12, 8),
+        title=" ",
+    ):
+        """
+        Plot the mindset stream graph.
+
+        Parameters:
+        - graph (list): A raw edgelist or a FormamentisNetwork, might include weights.
+        - shortest_paths(list of lists): if None, it will compute all shortest paths between the 2 nodes.
+        - start_node: The starting node for the shortest paths.
+        - end_node: The ending node for the shortest paths.
+        - quantile (float): The top quantile of shortest paths to keep. Defaults to None. Requires a weighted edgelist.
+        - figsize (tuple): Figure size for the plot. Defaults to (12, 8).
+
+        """
+        if type(graph).__name__ == "FormamentisNetwork":
+            graph = graph.edges
+
+        if shortest_paths == None:
+            shortest_paths = self.find_all_shortest_paths(graph, start_node, end_node)
+        if top_quantile != None and shortest_paths == None:
+            try:
+                shortest_paths = self.get_top_quantile_shortest_paths(
+                    graph, start_node, end_node, top_quantile=top_quantile
+                )
+            except:
+                raise ValueError(
+                    "If a quantile is set, weights should be necessary in the graph."
+                )
+
+        positive, negative, ambivalent = _valences(self.language)
+        start_node = shortest_paths[0][0]
+        end_node = shortest_paths[0][-1]
+        G = nx.Graph()
+
+        # Count edge frequencies
+        edge_counts = {}
+        for path in shortest_paths:
+            for i in range(len(path) - 1):
+                edge = tuple(sorted([path[i], path[i + 1]]))
+                edge_counts[edge] = edge_counts.get(edge, 0) + 1
+
+        # If the network is weighted, use the weights as edge counts
+        # If not weighted, all weights will be 1
+        is_weighted = len(graph[0]) == 3
+        for edge in graph:
+            sorted_edge = tuple(sorted([edge[0], edge[1]]))
+            if sorted_edge in edge_counts:
+                edge_counts[sorted_edge] = edge[2] if is_weighted else 1
+
+        # Add edges to the graph
+        for edge, count in edge_counts.items():
+            G.add_edge(edge[0], edge[1], weight=count)
+
+        # Create a layout with start_node on the left and end_node on the right
+        pos = {}
+        nodes = set(node for path in shortest_paths for node in path)
+        x_positions = {node: 0 for node in nodes}
+        x_positions[start_node] = 0
+        x_positions[end_node] = 1
+        for path in shortest_paths:
+            for i, node in enumerate(path[1:-1], 1):
+                x_positions[node] = max(x_positions[node], i / (len(path) - 1))
+
+        # Assign y-positions with more space
+        y_positions = {}
+        for x in set(x_positions.values()):
+            nodes_at_x = [node for node, pos in x_positions.items() if pos == x]
+            for i, node in enumerate(nodes_at_x):
+                y_positions[node] = (
+                    i - (len(nodes_at_x) - 1) / 2
+                ) * 0.2  # Increased spacing
+
+        # Set positions
+        for node in nodes:
+            pos[node] = (x_positions[node], y_positions[node])
+
+        # Adjust start and end node positions
+        pos[start_node] = (0, 0)
+        pos[end_node] = (1, 0)
+
+        # Determine node colors
+        node_colors = []
+        for node in G.nodes():
+            if node in positive:
+                node_colors.append("#1f77b4")  # Blue
+            elif node in negative:
+                node_colors.append("#d62728")  # Red
+            else:
+                node_colors.append("#7f7f7f")  # Grey
+
+        # Draw the graph
+        base_size = len(G.nodes())
+        plt.figure(figsize=figsize, dpi=300)
+
+        # Draw edges with varying thickness and colors
+        max_count = max(edge_counts.values())
+        min_width = (1.5 if is_weighted else 3) * (
+            figsize[0] / 12
+        )  # Reduced minimum edge width for unweighted networks
+        max_width = (16 if is_weighted else 3) * (
+            figsize[0] / 12
+        )  # Reduced maximum edge width for unweighted networks
+        for edge, count in edge_counts.items():
+            start, end = edge
+            if start in positive and end in positive:
+                color = "#1f77b4"  # Blue
+            elif start in negative and end in negative:
+                color = "#d62728"  # Red
+            elif (start in positive and end in negative) or (
+                start in negative and end in positive
+            ):
+                color = "#9467bd"  # Purple
+            elif (start in positive and end not in negative) or (
+                end in positive and start not in negative
+            ):
+                color = "#b4cad6"  # Grayish blue
+            elif (start in negative and end not in negative) or (
+                end in negative and start not in positive
+            ):
+                color = "#dc9f9e"  # Grayish red
+            else:
+                color = "#7f7f7f"  # Grey
+
+            # Calculate edge width with a minimum thickness
+            edge_width = min_width + (count / max_count) * (max_width - min_width)
+
+            nx.draw_networkx_edges(
+                G, pos, edgelist=[edge], width=edge_width, alpha=0.45, edge_color=color
+            )
+        # Draw node labels with custom bbox
+        # Calculate label size
+        width, height = figsize
+        reference_width = 12  # Reference width for (12, 8) figure
+        base_font_size = 10 - base_size * 0.07  # Original calculation
+        scaled_font_size = base_font_size * (
+            width / reference_width
+        )  # Scale based on width ratio
+
+        labels = nx.draw_networkx_labels(
+            G, pos, font_size=scaled_font_size, font_color="white"
+        )
+
+        # Customize label backgrounds
+        for node, label in labels.items():
+            color = node_colors[list(G.nodes()).index(node)]
+            label.set_bbox(
+                dict(
+                    facecolor=color,
+                    edgecolor="none",
+                    alpha=0.7,
+                    pad=0.5,
+                    boxstyle="round,pad=0.5",
+                )
+            )
+
+        plt.title(title, fontsize=16, fontweight="bold")
+        plt.axis("off")
+        plt.tight_layout()
+        plt.show()
+
+    def calculate_path_weight(self, network, path):
+        """
+        Calculate the weight of a given path in the network.
+
+        Parameters:
+        - network (list): A weighted edgelist.
+        - path (list): A list of nodes representing all paths.
+
+        Returns:
+        - weight (float): The total weight of the path.
+        """
+        weight = 0
+        for i in range(len(path) - 1):
+            for edge in network:
+                if (edge[0] == path[i] and edge[1] == path[i + 1]) or (
+                    edge[1] == path[i] and edge[0] == path[i + 1]
+                ):
+                    weight += edge[2]
+                    break
+        return weight
