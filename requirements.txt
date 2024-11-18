@@ -1,8 +1,8 @@
 matplotlib
-spacy==3.7.2
+spacy
 networkx
 nltk
-shapely==1.8.5.post1
+shapely>=2.0.1
 pandas
 community
 python-louvain
