@@ -768,7 +768,11 @@ class EmoScores:
         # Add nodes from vertices
         graph.add_nodes_from(fmnt.vertices)
         # Add edges from edges
-        graph.add_edges_from(fmnt.edges)
+        try:
+            graph.add_edges_from(fmnt.edges['syntactic'])
+        except:
+            graph.add_edges_from(fmnt.edges)
+        
         return graph
 
     from collections import defaultdict
