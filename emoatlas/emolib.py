@@ -341,17 +341,24 @@ class EmoScores:
             A list of 3 sets: positive, negative and neutral custom valences. Default is None.
             Currently only employed for edge_bundling.
         """
-        
+
         if custom_valences is not None:
             if type(custom_valences) != list and len(custom_valences) != 3:
-                raise ValueError("Custom valences must be a list of 3 sets: positive, negative and neutral")
+                raise ValueError(
+                    "Custom valences must be a list of 3 sets: positive, negative and neutral"
+                )
             elif type(custom_valence[0] != set):
-                raise ValueError("Custom valences must be a list of 3 sets: positive, negative and neutral")
+                raise ValueError(
+                    "Custom valences must be a list of 3 sets: positive, negative and neutral"
+                )
             elif type(custom_valence[1] != set):
-                raise ValueError("Custom valences must be a list of 3 sets: positive, negative and neutral")
+                raise ValueError(
+                    "Custom valences must be a list of 3 sets: positive, negative and neutral"
+                )
             elif type(custom_valence[2] != set):
-                raise ValueError("Custom valences must be a list of 3 sets: positive, negative and neutral")
-
+                raise ValueError(
+                    "Custom valences must be a list of 3 sets: positive, negative and neutral"
+                )
 
         # Check if alpha values are within the range [0.0, 1.0]
         if not (0.0 <= alpha_syntactic <= 1.0):
@@ -361,7 +368,7 @@ class EmoScores:
         if not (0.0 <= alpha_synonyms <= 1.0):
             raise ValueError("Alpha value for synonyms must be between 0.0 and 1.0")
 
-        if layout == "force_layout":
+        if layout == " force_layout":
             dff.draw_formamentis_force_layout(
                 fmn.edges,
                 highlight=highlight,
@@ -373,7 +380,7 @@ class EmoScores:
                 alpha_syntactic=alpha_syntactic,
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
-                save_path=save_path
+                save_path=save_path,
             )
         elif layout == "edge_bundling":
             dfb.draw_formamentis_circle_layout(
