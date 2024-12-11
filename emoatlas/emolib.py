@@ -374,7 +374,7 @@ class EmoScores:
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
                 save_path=save_path
-                )
+            )
         elif layout == "edge_bundling":
             dfb.draw_formamentis_circle_layout(
                 fmn,
