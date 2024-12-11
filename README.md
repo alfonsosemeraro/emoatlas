@@ -39,4 +39,4 @@ A Google Colab simple demo is also available [here](https://colab.research.googl
 **It is suggested to refer to the guides of the `demos/` folder to understand how to use the package.**
 
 ## Acknowledgements
-Thanks to [@FinleyGibson](https://github.com/FinleyGibson) and [@GiulioRossetti](https://github.com/GiulioRossetti) for their contribution to the testing, debugging and refactoring this library.
+Thanks to [@FinleyGibson](https://github.com/FinleyGibson), [@GiulioRossetti](https://github.com/GiulioRossetti) and [@RiccardoImprota](https://github.com/RiccardoImprota) for their contribution to the testing, debugging and refactoring this library.

@@ -145,6 +145,7 @@ def draw_formamentis_circle_layout(
     alpha_hypernyms=0.5,
     alpha_synonyms=0.5,
     save_path=None,
+    custom_valences=None,
 ):
     """ """
 
@@ -159,7 +160,10 @@ def draw_formamentis_circle_layout(
     }  # (196/256, 128/256, 153/256)}
 
     # Get positive or negative valences
-    _positive, _negative, _ambivalent = _valences(language)
+    if custom_valences:
+        _positive, _negative, _ambivalent = custom_valences
+    else:
+        _positive, _negative, _ambivalent = _valences(language)
 
     if not ax:
         _, ax = plt.subplots(figsize=(16, 16))

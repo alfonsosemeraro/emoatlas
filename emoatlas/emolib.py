@@ -295,6 +295,7 @@ class EmoScores:
         alpha_hypernyms=0.5,
         alpha_synonyms=0.5,
         save_path=None,
+        custom_valences=None,
     ):
         """
         Represents a Formamentis Network in either a circular or force-based layout.
@@ -333,9 +334,24 @@ class EmoScores:
             A numeric. Alpha value for synonyms edges, must be between 0.0 and 1.0
 
         *save_path*:
-        A string representing the file path where the figure should be saved.
-        If None, the figure will only be plotted and not saved. Default is None.
+            A string representing the file path where the figure should be saved.
+            If None, the figure will only be plotted and not saved. Default is None.
+
+        *custom_valences*:
+            A list of 3 sets: positive, negative and neutral custom valences. Default is None.
+            Currently only employed for edge_bundling.
         """
+        
+        if custom_valences is not None:
+            if type(custom_valences) != list and len(custom_valences) != 3:
+                raise ValueError("Custom valences must be a list of 3 sets: positive, negative and neutral")
+            elif type(custom_valence[0] != set):
+                raise ValueError("Custom valences must be a list of 3 sets: positive, negative and neutral")
+            elif type(custom_valence[1] != set):
+                raise ValueError("Custom valences must be a list of 3 sets: positive, negative and neutral")
+            elif elif type(custom_valence[2] != set):
+                raise ValueError("Custom valences must be a list of 3 sets: positive, negative and neutral")
+
 
         # Check if alpha values are within the range [0.0, 1.0]
         if not (0.0 <= alpha_syntactic <= 1.0):
@@ -357,8 +373,8 @@ class EmoScores:
                 alpha_syntactic=alpha_syntactic,
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
-                save_path=save_path,
-            )
+                save_path=save_path
+                )
         elif layout == "edge_bundling":
             dfb.draw_formamentis_circle_layout(
                 fmn,
@@ -372,6 +388,7 @@ class EmoScores:
                 alpha_hypernyms=alpha_hypernyms,
                 alpha_synonyms=alpha_synonyms,
                 save_path=save_path,
+                custom_valences=custom_valences,
             )
 
     def extract_word_from_formamentis(self, fmn, target_word):
