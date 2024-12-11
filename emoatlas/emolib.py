@@ -343,19 +343,11 @@ class EmoScores:
         """
 
         if custom_valences is not None:
-            if type(custom_valences) != list and len(custom_valences) != 3:
+            if not isinstance(custom_valences, list) or len(custom_valences) != 3:
                 raise ValueError(
                     "Custom valences must be a list of 3 sets: positive, negative and neutral"
                 )
-            elif type(custom_valences[0] != set):
-                raise ValueError(
-                    "Custom valences must be a list of 3 sets: positive, negative and neutral"
-                )
-            elif type(custom_valences[1] != set):
-                raise ValueError(
-                    "Custom valences must be a list of 3 sets: positive, negative and neutral"
-                )
-            elif type(custom_valences[2] != set):
+            if not all(isinstance(val, set) for val in custom_valences):
                 raise ValueError(
                     "Custom valences must be a list of 3 sets: positive, negative and neutral"
                 )
