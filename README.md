@@ -5,7 +5,7 @@ A Python library for the detection and visualization of emotions in texts, comin
 
 ## Description
 
-EmoAtlas is a Python library that checks against the input text, after having enriched it and structured as a semantic network, against the multilingual [NRC Lexicon](https://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm). The library is built upon the [Formamentis Networks](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0222870) from Stella et al. and the [PyPlutchik library](https://www.github.com/alfonsosemeraro/pyplutchik) (paper [here](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0256503)).
+EmoAtlas is a Python library that checks against the input text, after having enriched it and structured as a semantic network, against the multilingual [NRC Lexicon](https://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm). The library is built upon the [forma mentis Networks](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0222870) from Stella et al. and the [PyPlutchik library](https://www.github.com/alfonsosemeraro/pyplutchik) (paper [here](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0256503)).
 
 ![](fig1_1500.png)
 
@@ -39,4 +39,4 @@ A Google Colab simple demo is also available [here](https://colab.research.googl
 **It is suggested to refer to the guides of the `demos/` folder to understand how to use the package.**
 
 ## Acknowledgements
-Thanks to [@FinleyGibson](https://github.com/FinleyGibson) and [@GiulioRossetti](https://github.com/GiulioRossetti) for their contribution to the testing, debugging and refactoring this library.
+Thanks to [@FinleyGibson](https://github.com/FinleyGibson), [@GiulioRossetti](https://github.com/GiulioRossetti) and [@RiccardoImprota](https://github.com/RiccardoImprota) for their contribution to the testing, debugging and refactoring this library.
