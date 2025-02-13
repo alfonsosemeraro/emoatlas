@@ -36,7 +36,7 @@ See the Jupyter notebooks in `Demos&Guides/` for examples of how to use emoatlas
 #### Google Colab
 A Google Colab simple demo is also available [here](https://colab.research.google.com/drive/1qzymy0-5EXv3E6dQ0c_D3mv8tyvjSduX?usp=sharing).
 
-**It is suggested to refer to the guides of the `demos/` folder to understand how to use the package.**
+**It is suggested to refer to the guides of the `Demos&Guides/` folder to understand how to use the package.**
 
 ## Acknowledgements
 Thanks to [@FinleyGibson](https://github.com/FinleyGibson), [@GiulioRossetti](https://github.com/GiulioRossetti) and [@RiccardoImprota](https://github.com/RiccardoImprota) for their contribution to the testing, debugging and refactoring this library.
